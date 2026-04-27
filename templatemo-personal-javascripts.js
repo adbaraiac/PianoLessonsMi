@@ -94,6 +94,8 @@ let ticking = false;
 function updateParallax() {
   const hero = document.querySelector('.hero');
   if (!hero) return;
+  if (window.matchMedia('(max-width: 768px)').matches) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const rate = window.pageYOffset * -0.2;
   hero.style.transform = `translateY(${rate}px)`;
   ticking = false;

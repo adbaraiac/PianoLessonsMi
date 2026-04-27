@@ -149,6 +149,28 @@ section { padding: 8rem 0; }
 }
 .cta-button:hover { transform: translateY(-2px); background: rgba(255,255,255,0.25); box-shadow: 0 20px 40px rgba(0,0,0,.2); border-color: rgba(255,255,255,0.5); }
 
+/* Conversion helpers: quick trust/pricing badges near CTA */
+.hero-badges {
+  display: flex;
+  gap: .6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: .35rem auto 1.1rem;
+  max-width: 760px;
+}
+.hero-badge {
+  background: rgba(2,6,23,.40);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #f8fafc;
+  border-radius: 999px;
+  padding: .45rem .8rem;
+  font-weight: 700;
+  font-size: .92rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+}
+.hero-badge strong { color: #fff; }
+
 @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); }}
 
 /* Scroll indicator */
@@ -429,6 +451,9 @@ section { padding: 8rem 0; }
   .hero h1 { font-size: 2.25rem; }
   .section-title { font-size: 2.25rem; }
   .portfolio-grid, .testimonials-grid { grid-template-columns: 1fr; }
+  .teacher-card { grid-template-columns: 1fr; }
+  .teacher-photo { min-height: 0; aspect-ratio: 4 / 3; background-position: center 20%; }
+  .hero-badge { font-size: .88rem; }
   .form-row { grid-template-columns: 1fr; gap: 1rem; }
   .container, .nav-container { padding: 0 1.25rem; }
 }
