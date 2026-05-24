@@ -1,111 +1,106 @@
-/*
-// TemplateMo 593 personal shape
-// https://templatemo.com/tm-593-personal-shape
-*/
+/* Baraiac Piano Lessons — interactions */
 
-// ===== Mobile menu =====
 const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 const mobileMenu = document.getElementById('mobileMenu');
 const mobileNavLinks = document.querySelectorAll('.mobile-nav-links a');
 
-if (mobileMenuToggle) {
+function closeMobileMenu() {
+  if (!mobileMenuToggle || !mobileMenu) return;
+  mobileMenuToggle.classList.remove('active');
+  mobileMenu.classList.remove('active');
+  mobileMenuToggle.setAttribute('aria-expanded', 'false');
+  mobileMenu.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+if (mobileMenuToggle && mobileMenu) {
   const toggleMenu = () => {
-    const expanded = mobileMenuToggle.getAttribute('aria-expanded') === 'true' || false;
-    mobileMenuToggle.setAttribute('aria-expanded', (!expanded).toString());
-    mobileMenuToggle.classList.toggle('active');
-    mobileMenu.classList.toggle('active');
-    const isActive = mobileMenu.classList.contains('active');
-    mobileMenu.setAttribute('aria-hidden', (!isActive).toString());
-    document.body.style.overflow = isActive ? 'hidden' : 'auto';
+    const isOpen = mobileMenu.classList.contains('active');
+    mobileMenuToggle.classList.toggle('active', !isOpen);
+    mobileMenu.classList.toggle('active', !isOpen);
+    mobileMenuToggle.setAttribute('aria-expanded', (!isOpen).toString());
+    mobileMenu.setAttribute('aria-hidden', isOpen.toString());
+    document.body.style.overflow = isOpen ? '' : 'hidden';
   };
 
   mobileMenuToggle.addEventListener('click', toggleMenu);
-  mobileMenuToggle.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMenu(); } });
-
-  mobileNavLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      mobileMenuToggle.classList.remove('active');
-      mobileMenu.classList.remove('active');
-      mobileMenuToggle.setAttribute('aria-expanded', 'false');
-      mobileMenu.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = 'auto';
-    });
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!mobileMenuToggle.contains(e.target) && !mobileMenu.contains(e.target)) {
-      mobileMenuToggle.classList.remove('active');
-      mobileMenu.classList.remove('active');
-      mobileMenuToggle.setAttribute('aria-expanded', 'false');
-      mobileMenu.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = 'auto';
-    }
-  });
+  mobileNavLinks.forEach((link) => link.addEventListener('click', closeMobileMenu));
 }
 
-// ===== Navbar scroll effect =====
 window.addEventListener('scroll', () => {
   const navbar = document.getElementById('navbar');
   if (!navbar) return;
-  if (window.scrollY > 50) {
-    navbar.classList.add('scrolled');
-  } else {
-    navbar.classList.remove('scrolled');
-  }
+  navbar.classList.toggle('scrolled', window.scrollY > 24);
 });
 
-// ===== Intersection Observer (animations) =====
-const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -80px 0px' };
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('animate'); });
+const observerOptions = { threshold: 0.12, rootMargin: '0px 0px -40px 0px' };
+const fadeObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('animate');
+      fadeObserver.unobserve(entry.target);
+    }
+  });
 }, observerOptions);
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right').forEach(el => observer.observe(el));
-
-  const portfolioSection = document.querySelector('.portfolio-grid');
-  if (portfolioSection) {
-    const portfolioObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const items = entry.target.querySelectorAll('.portfolio-item');
-          items.forEach((item, index) => { setTimeout(() => item.classList.add('animate'), index * 120); });
-        }
-      });
-    }, { threshold: 0.1 });
-    portfolioObserver.observe(portfolioSection);
-  }
+  document.querySelectorAll('.fade-in').forEach((el) => fadeObserver.observe(el));
+  initTestimonialCarousel();
 });
 
-// ===== Smooth scrolling =====
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   anchor.addEventListener('click', function (e) {
-    const target = document.querySelector(this.getAttribute('href'));
+    const href = this.getAttribute('href');
+    if (!href || href === '#') return;
+    const target = document.querySelector(href);
     if (!target) return;
     e.preventDefault();
-    const y = target.getBoundingClientRect().top + window.pageYOffset - 80;
+    const offset = document.getElementById('navbar')?.offsetHeight || 72;
+    const y = target.getBoundingClientRect().top + window.pageYOffset - offset;
     window.scrollTo({ top: y, behavior: 'smooth' });
+    closeMobileMenu();
   });
 });
 
+function initTestimonialCarousel() {
+  const carousel = document.getElementById('testimonialCarousel');
+  if (!carousel) return;
 
-// ===== Parallax effect (subtle) =====
-let ticking = false;
-function updateParallax() {
-  const hero = document.querySelector('.hero');
-  if (!hero) return;
-  if (window.matchMedia('(max-width: 768px)').matches) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const rate = window.pageYOffset * -0.2;
-  hero.style.transform = `translateY(${rate}px)`;
-  ticking = false;
+  const slides = carousel.querySelectorAll('.testimonial-slide');
+  const dotsContainer = carousel.querySelector('.carousel-dots');
+  const prevBtn = carousel.querySelector('.carousel-prev');
+  const nextBtn = carousel.querySelector('.carousel-next');
+  let current = 0;
+  let autoplayId;
+
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.className = 'carousel-dot' + (i === 0 ? ' is-active' : '');
+    dot.setAttribute('aria-label', `Review ${i + 1}`);
+    dot.setAttribute('role', 'tab');
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  });
+
+  const dots = dotsContainer.querySelectorAll('.carousel-dot');
+
+  function goTo(index) {
+    slides[current].classList.remove('is-active');
+    dots[current].classList.remove('is-active');
+    current = (index + slides.length) % slides.length;
+    slides[current].classList.add('is-active');
+    dots[current].classList.add('is-active');
+    resetAutoplay();
+  }
+
+  function resetAutoplay() {
+    clearInterval(autoplayId);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    autoplayId = setInterval(() => goTo(current + 1), 6000);
+  }
+
+  prevBtn?.addEventListener('click', () => goTo(current - 1));
+  nextBtn?.addEventListener('click', () => goTo(current + 1));
+  resetAutoplay();
 }
-window.addEventListener('scroll', () => {
-  if (!ticking) { requestAnimationFrame(updateParallax); ticking = true; }
-});
-
-// ===== Hover effects on skill tags =====
-document.querySelectorAll('.skill-tag').forEach(tag => {
-  tag.addEventListener('mouseenter', () => { tag.style.transform = 'translateY(-2px) scale(1.05)'; });
-  tag.addEventListener('mouseleave', () => { tag.style.transform = 'translateY(0) scale(1)'; });
-});
