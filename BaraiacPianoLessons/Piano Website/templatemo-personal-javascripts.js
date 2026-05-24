@@ -20,20 +20,48 @@ if (mobileMenuToggle && mobileMenu) {
     mobileMenu.classList.toggle('active', !isOpen);
     mobileMenuToggle.setAttribute('aria-expanded', (!isOpen).toString());
     mobileMenu.setAttribute('aria-hidden', isOpen.toString());
-    document.body.style.overflow = isOpen ? '' : 'hidden';
+    document.body.style.overflow = isOpen ? 'hidden' : '';
   };
 
   mobileMenuToggle.addEventListener('click', toggleMenu);
   mobileNavLinks.forEach((link) => link.addEventListener('click', closeMobileMenu));
 }
 
+function initStickyMobileCta() {
+  const sticky = document.getElementById('mobileStickyCta');
+  const hero = document.getElementById('home');
+  const contact = document.getElementById('contact');
+  if (!sticky || !hero) return;
+
+  const mq = window.matchMedia('(max-width: 768px)');
+
+  const update = () => {
+    if (!mq.matches) {
+      sticky.classList.remove('is-visible');
+      document.body.classList.remove('mobile-cta-active');
+      sticky.setAttribute('aria-hidden', 'true');
+      return;
+    }
+
+    const contactTop = contact ? contact.getBoundingClientRect().top : Infinity;
+    const show = contactTop > window.innerHeight * 0.35;
+
+    sticky.classList.toggle('is-visible', show);
+    document.body.classList.toggle('mobile-cta-active', show);
+    sticky.setAttribute('aria-hidden', (!show).toString());
+  };
+
+  window.addEventListener('scroll', update, { passive: true });
+  mq.addEventListener('change', update);
+  update();
+}
+
 window.addEventListener('scroll', () => {
   const navbar = document.getElementById('navbar');
   if (!navbar) return;
   navbar.classList.toggle('scrolled', window.scrollY > 24);
-});
+}, { passive: true });
 
-const observerOptions = { threshold: 0.12, rootMargin: '0px 0px -40px 0px' };
 const fadeObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
@@ -41,11 +69,12 @@ const fadeObserver = new IntersectionObserver((entries) => {
       fadeObserver.unobserve(entry.target);
     }
   });
-}, observerOptions);
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.fade-in').forEach((el) => fadeObserver.observe(el));
+  document.querySelectorAll('.fade-in, .stagger-children').forEach((el) => fadeObserver.observe(el));
   initTestimonialCarousel();
+  initStickyMobileCta();
 });
 
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
