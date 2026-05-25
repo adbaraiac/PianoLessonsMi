@@ -339,7 +339,7 @@ nav.scrolled {
 .hero-media {
   position: absolute;
   inset: 0;
-  background: url('images/YoungHappyGirlPlayingThePiano.jpg') center/cover no-repeat;
+  background: url('/images/YoungHappyGirlPlayingThePiano.jpg') center/cover no-repeat;
   z-index: 0;
 }
 
@@ -1034,11 +1034,11 @@ body.mobile-cta-active {
 
 .footer-links a:hover { color: var(--color-accent); }
 
-/* ===== Animations ===== */
+/* ===== Animations (content always visible) ===== */
 .fade-in {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 .fade-in.animate {
@@ -1047,22 +1047,18 @@ body.mobile-cta-active {
 }
 
 .stagger-children.animate > * {
-  animation: fadeUp 0.55s ease forwards;
+  animation: fadeUp 0.45s ease both;
 }
 
-.stagger-children.animate > *:nth-child(1) { animation-delay: 0.05s; }
-.stagger-children.animate > *:nth-child(2) { animation-delay: 0.12s; }
-.stagger-children.animate > *:nth-child(3) { animation-delay: 0.19s; }
-.stagger-children.animate > *:nth-child(4) { animation-delay: 0.26s; }
-.stagger-children.animate > *:nth-child(5) { animation-delay: 0.33s; }
-.stagger-children.animate > *:nth-child(6) { animation-delay: 0.4s; }
-
-.stagger-children > * {
-  opacity: 0;
-  transform: translateY(16px);
-}
+.stagger-children.animate > *:nth-child(1) { animation-delay: 0.04s; }
+.stagger-children.animate > *:nth-child(2) { animation-delay: 0.09s; }
+.stagger-children.animate > *:nth-child(3) { animation-delay: 0.14s; }
+.stagger-children.animate > *:nth-child(4) { animation-delay: 0.19s; }
+.stagger-children.animate > *:nth-child(5) { animation-delay: 0.24s; }
+.stagger-children.animate > *:nth-child(6) { animation-delay: 0.29s; }
 
 @keyframes fadeUp {
+  from { opacity: 0.6; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -1076,7 +1072,7 @@ body.mobile-cta-active {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .fade-in,
-  .stagger-children > * { opacity: 1; transform: none; transition: none; animation: none; }
+  .stagger-children > * { animation: none !important; transition: none; }
   .testimonial-slide { transition: none; }
   .mobile-sticky-cta { transition: none; }
 }
