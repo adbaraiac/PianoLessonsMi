@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTestimonialCarousel();
   initStickyMobileCta();
   initBookingForm();
+  initEnrollmentCountdown();
 });
 
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
@@ -97,6 +98,29 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     closeMobileMenu();
   });
 });
+
+/* ===== Enrollment countdown ===== */
+function initEnrollmentCountdown() {
+  const el = document.getElementById('enrollmentCountdown');
+  if (!el || !el.dataset.deadline) return;
+  const deadline = new Date(el.dataset.deadline);
+  if (Number.isNaN(deadline.getTime())) return;
+
+  function update() {
+    const diffMs = deadline.getTime() - Date.now();
+    if (diffMs <= 0) {
+      // Reminder: update data-deadline in index.html for the next enrollment
+      // cycle once this one closes.
+      el.textContent = 'Enrollment is closed for this season—check back soon.';
+      return;
+    }
+    const days = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+    el.innerHTML = `Enrollment closes in <strong>${days} day${days === 1 ? '' : 's'}</strong>`;
+  }
+
+  update();
+  setInterval(update, 1000 * 60 * 30);
+}
 
 /* ===== Booking form ===== */
 const BOOKING_PHONE = '+12486071916';
