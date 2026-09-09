@@ -1,0 +1,118 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Baraiac Piano Lessons - lead intake + email/SMS notification backend
+
+Parameters:
+  AidenPhoneNumber:
+    Type: String
+    Description: "Aiden's phone number in E.164 format, e.g. +12486071916"
+    Default: "+12486071916"
+  AllowedOrigin:
+    Type: String
+    Description: "The site origin allowed to call POST /leads"
+    Default: "https://pianolessonsmi.com"
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 10
+    MemorySize: 128
+    Environment:
+      Variables:
+        LEADS_TABLE: !Ref PianoLeadsTable
+        SLOTS_TABLE: !Ref TeacherSlotsTable
+        AIDEN_PHONE: !Ref AidenPhoneNumber
+        NOTIFICATION_TOPIC_ARN: !Ref LeadNotificationsTopic
+
+Resources:
+  LeadNotificationsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: "Baraiac Piano - new lead notifications"
+
+  PianoApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref AllowedOrigin
+          - "https://www.pianolessonsmi.com"
+          - "http://localhost:8123"
+        AllowMethods:
+          - GET
+          - POST
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+
+  PianoLeadsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+
+  TeacherSlotsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: teacherDay
+        Type: String
+
+  SubmitLeadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: submitLead.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PianoLeadsTable
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt LeadNotificationsTopic.TopicName
+        - Statement:
+            # Direct-to-phone-number SMS publish has no resource ARN to scope
+            # to. This is unused until the toll-free number registration is
+            # approved, but left in place so SMS activates automatically
+            # once it is - no code change needed then.
+            - Effect: Allow
+              Action: sns:Publish
+              Resource: "*"
+      Events:
+        SubmitLead:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PianoApi
+            Path: /leads
+            Method: POST
+
+  LeadStatusPageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: leadStatusPage.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PianoLeadsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TeacherSlotsTable
+      Events:
+        GetLead:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PianoApi
+            Path: /leads/{id}
+            Method: GET
+        UpdateLead:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PianoApi
+            Path: /leads/{id}
+            Method: POST
+
+Outputs:
+  ApiUrl:
+    Description: "Base URL for the API - set this as LEADS_API_URL in templatemo-personal-javascripts.js"
+    Value: !Sub "https://${PianoApi}.execute-api.${AWS::Region}.amazonaws.com"
+  NotificationTopicArn:
+    Description: "Subscribe an email to this topic: aws sns subscribe --topic-arn <this> --protocol email --notification-endpoint you@example.com"
+    Value: !Ref LeadNotificationsTopic

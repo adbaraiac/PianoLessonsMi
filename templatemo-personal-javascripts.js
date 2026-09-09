@@ -1,5 +1,10 @@
 /* Baraiac Piano Lessons — interactions */
 
+// Deployed backend (see backend/README.md) - automatically emails/texts
+// Aiden on submission. If this API is ever unreachable, the form falls back
+// to the tap-to-text/email flow below - it never breaks either way.
+const LEADS_API_URL = 'https://8qzuq3rfrk.execute-api.us-east-1.amazonaws.com';
+
 const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 const mobileMenu = document.getElementById('mobileMenu');
 const mobileNavLinks = document.querySelectorAll('.mobile-nav-links a');
@@ -75,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.fade-in, .stagger-children').forEach((el) => fadeObserver.observe(el));
   initTestimonialCarousel();
   initStickyMobileCta();
+  initBookingForm();
 });
 
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
@@ -84,12 +90,184 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     const target = document.querySelector(href);
     if (!target) return;
     e.preventDefault();
-    const offset = document.getElementById('navbar')?.offsetHeight || 72;
-    const y = target.getBoundingClientRect().top + window.pageYOffset - offset;
+    const navOffset = document.getElementById('navbar')?.offsetHeight || 72;
+    const announceOffset = document.querySelector('.announcement-bar')?.offsetHeight || 0;
+    const y = target.getBoundingClientRect().top + window.pageYOffset - navOffset - announceOffset;
     window.scrollTo({ top: y, behavior: 'smooth' });
     closeMobileMenu();
   });
 });
+
+/* ===== Booking form ===== */
+const BOOKING_PHONE = '+12486071916';
+const BOOKING_EMAIL = 'adbaraiac04@gmail.com';
+
+const TROY_NORTH_ZONE = 'troy-north';
+
+const AREA_LABELS = {
+  'troy-north': 'Troy — near Long Lake / John R / Rochester Rd',
+  'troy-other': 'Troy — other area',
+  'rochester-hills': 'Rochester Hills',
+  'rochester': 'Rochester',
+  'birmingham': 'Birmingham',
+  'royal-oak': 'Royal Oak',
+  'bloomfield-hills': 'Bloomfield Hills',
+  'other': 'Other / not listed',
+};
+
+const DAY_OPTIONS = {
+  saturday: { label: 'Saturday', zones: 'all', times: ['Morning (9am–12pm)', 'Midday (12–3pm)', 'Afternoon (3–6pm)', 'Evening (6–8pm)'] },
+  thursday: { label: 'Thursday (after 1pm)', zones: [TROY_NORTH_ZONE], times: ['1–3pm', '3–5pm', '5–7pm'] },
+  friday: { label: 'Friday (after 1pm)', zones: [TROY_NORTH_ZONE], times: ['1–3pm', '3–5pm', '5–7pm'] },
+};
+
+function availableDaysForArea(area) {
+  return Object.entries(DAY_OPTIONS)
+    .filter(([, cfg]) => cfg.zones === 'all' || cfg.zones.includes(area))
+    .map(([key, cfg]) => ({ key, label: cfg.label }));
+}
+
+function initBookingForm() {
+  const form = document.getElementById('bookingForm');
+  if (!form) return;
+
+  const areaSelect = document.getElementById('area');
+  const areaNote = document.getElementById('areaNote');
+  const daySelect = document.getElementById('day');
+  const timeSelect = document.getElementById('time');
+
+  function setSelectOptions(select, options, placeholder) {
+    select.innerHTML = '';
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.disabled = true;
+    ph.selected = true;
+    ph.textContent = placeholder;
+    select.appendChild(ph);
+    options.forEach((opt) => {
+      const el = document.createElement('option');
+      el.value = opt.value;
+      el.textContent = opt.label;
+      select.appendChild(el);
+    });
+    select.disabled = options.length === 0;
+  }
+
+  function updateDays() {
+    const area = areaSelect.value;
+    if (!area) {
+      setSelectOptions(daySelect, [], 'Select your area first');
+      setSelectOptions(timeSelect, [], 'Select a day first');
+      areaNote.textContent = '';
+      return;
+    }
+
+    const days = availableDaysForArea(area);
+    setSelectOptions(daySelect, days.map((d) => ({ value: d.key, label: d.label })), 'Select a day');
+    setSelectOptions(timeSelect, [], 'Select a day first');
+
+    areaNote.textContent = area === TROY_NORTH_ZONE
+      ? '✓ Great news—your area has Saturday, Thursday & Friday (after 1pm) availability.'
+      : 'Saturdays (all day) are available in your area. Thursday & Friday afternoons are currently reserved for the Long Lake / John R / Rochester Rd zone in Troy.';
+  }
+
+  function updateTimes() {
+    const day = daySelect.value;
+    const cfg = DAY_OPTIONS[day];
+    if (!cfg) {
+      setSelectOptions(timeSelect, [], 'Select a day first');
+      return;
+    }
+    setSelectOptions(timeSelect, cfg.times.map((t) => ({ value: t, label: t })), 'Select a time');
+  }
+
+  areaSelect.addEventListener('change', updateDays);
+  daySelect.addEventListener('change', updateTimes);
+
+  const confirmPanel = document.getElementById('bookingConfirm');
+  const confirmName = document.getElementById('confirmName');
+  const confirmSummary = document.getElementById('confirmSummary');
+  const confirmSmsLink = document.getElementById('confirmSmsLink');
+  const confirmEmailLink = document.getElementById('confirmEmailLink');
+  const confirmEditBtn = document.getElementById('confirmEditBtn');
+  const sentPanel = document.getElementById('bookingSent');
+  const sentChildName = document.getElementById('sentChildName');
+
+  async function trySubmitToApi(data, areaLabel, dayLabel) {
+    if (!LEADS_API_URL) return false;
+    try {
+      const res = await fetch(`${LEADS_API_URL}/leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          parentName: data.parentName,
+          parentPhone: data.parentPhone,
+          childName: data.childName,
+          childAge: data.childAge,
+          favoriteSong: data.favoriteSong || '',
+          area: areaLabel,
+          day: dayLabel,
+          time: data.time,
+          notes: data.notes || '',
+        }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+
+    const data = Object.fromEntries(new FormData(form).entries());
+    const dayLabel = DAY_OPTIONS[data.day]?.label || data.day;
+    const areaLabel = AREA_LABELS[data.area] || data.area;
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+    const sentAutomatically = await trySubmitToApi(data, areaLabel, dayLabel);
+    if (submitBtn) submitBtn.disabled = false;
+
+    if (sentAutomatically) {
+      sentChildName.textContent = data.childName || 'there';
+      form.hidden = true;
+      sentPanel.hidden = false;
+      sentPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    // Backend not configured (LEADS_API_URL empty) or the request failed -
+    // fall back to letting the parent send the request themselves.
+    const lines = [
+      `Hi! I'd like to book a free trial piano lesson.`,
+      `Parent: ${data.parentName} (${data.parentPhone})`,
+      `Child: ${data.childName}, age ${data.childAge}`,
+      data.favoriteSong ? `Favorite song: ${data.favoriteSong}` : null,
+      `Area: ${areaLabel}`,
+      `Preferred: ${dayLabel} — ${data.time}`,
+      data.notes ? `Notes: ${data.notes}` : null,
+    ].filter(Boolean);
+
+    const message = lines.join('\n');
+
+    confirmName.textContent = data.childName || 'there';
+    confirmSummary.innerHTML = lines.map((l) => `<p>${l.replace(/</g, '&lt;')}</p>`).join('');
+    confirmSmsLink.href = `sms:${BOOKING_PHONE}?body=${encodeURIComponent(message)}`;
+    confirmEmailLink.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent('New free trial lesson request')}&body=${encodeURIComponent(message)}`;
+
+    form.hidden = true;
+    confirmPanel.hidden = false;
+    confirmPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  confirmEditBtn?.addEventListener('click', () => {
+    confirmPanel.hidden = true;
+    form.hidden = false;
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
 
 function initTestimonialCarousel() {
   const carousel = document.getElementById('testimonialCarousel');

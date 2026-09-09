@@ -1,0 +1,3 @@
+backend/.aws-sam/
+backend/src/node_modules/
+.claude/
