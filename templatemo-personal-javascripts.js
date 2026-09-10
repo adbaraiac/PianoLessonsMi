@@ -5,6 +5,21 @@
 // to the tap-to-text/email flow below - it never breaks either way.
 const LEADS_API_URL = 'https://8qzuq3rfrk.execute-api.us-east-1.amazonaws.com';
 
+// Ad platform conversion tracking - fired only on a real successful booking
+// submission (see trySubmitToApi's success branch below). Leave a value
+// empty to skip firing that platform's event.
+const GOOGLE_ADS_SEND_TO = 'AW-17704442079/_AnmCKDUqPMcEN-xkfpB';
+const META_PIXEL_ID = ''; // e.g. '1234567890123456'
+
+function fireConversionTracking() {
+  if (GOOGLE_ADS_SEND_TO && typeof gtag === 'function') {
+    gtag('event', 'conversion', { send_to: GOOGLE_ADS_SEND_TO });
+  }
+  if (META_PIXEL_ID && typeof fbq === 'function') {
+    fbq('track', 'Lead');
+  }
+}
+
 const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 const mobileMenu = document.getElementById('mobileMenu');
 const mobileNavLinks = document.querySelectorAll('.mobile-nav-links a');
@@ -244,6 +259,10 @@ function initBookingForm() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!form.reportValidity()) return;
+
+    // A validly completed booking form is the lead event ad platforms should
+    // optimize toward, regardless of which notification path below succeeds.
+    fireConversionTracking();
 
     const data = Object.fromEntries(new FormData(form).entries());
     const dayLabel = DAY_OPTIONS[data.day]?.label || data.day;
