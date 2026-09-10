@@ -45,7 +45,7 @@
 
   <nav id="navbar" aria-label="Main navigation">
     <div class="nav-container">
-      <a href="#home" class="logo">Baraiac Piano</a>
+      <a href="#home" class="logo"><img src="/images/logo-icon.png" alt="" width="36" height="36" class="logo-icon" />Baraiac Piano</a>
       <ul class="nav-links">
         <li><a href="#how-it-works">How It Works</a></li>
         <li><a href="#pricing">Pricing</a></li>
@@ -231,27 +231,15 @@
           <p><strong>7 open enrollment spots</strong> left for Fall across all teachers—once they're filled, new students join the priority waitlist.<!-- Update this count to reflect real current capacity --></p>
           <p class="scarcity-countdown" id="enrollmentCountdown" data-deadline="2026-09-30T23:59:59"><!-- Update data-deadline each enrollment cycle --></p>
         </div>
-        <div class="pricing-grid fade-in stagger-children">
-          <article class="pricing-card pricing-card-essentials">
+        <div class="pricing-grid pricing-grid-two fade-in stagger-children">
+          <article class="pricing-card pricing-card-featured pricing-card-premium">
+            <span class="pricing-badge">Most Popular</span>
             <p class="pricing-pace">Weekly lessons</p>
-            <h3 class="pricing-name">Essentials</h3>
-            <p class="pricing-price"><span class="price-amount">$279</span><span class="price-period">/month</span></p>
+            <h3 class="pricing-name">Weekly</h3>
+            <p class="pricing-price"><span class="price-amount">$329</span><span class="price-period">/month</span></p>
             <ul class="pricing-features">
               <li>Weekly private in-home piano lesson</li>
               <li>Personalized songs and learning pace</li>
-              <li>Flexible scheduling</li>
-              <li>Full bonus stack included ($230+ value)</li>
-            </ul>
-            <a href="#contact" class="btn btn-outline btn-block">Free Trial Lesson</a>
-          </article>
-
-          <article class="pricing-card pricing-card-featured pricing-card-premium">
-            <span class="pricing-badge">Most Popular</span>
-            <p class="pricing-pace">Best for most families</p>
-            <h3 class="pricing-name">Premium</h3>
-            <p class="pricing-price"><span class="price-amount">$329</span><span class="price-period">/month</span></p>
-            <ul class="pricing-features">
-              <li>Everything in Essentials</li>
               <li>Priority scheduling (first pick of times)</li>
               <li>Annual student recital slot</li>
               <li>Full bonus stack included ($230+ value)</li>
@@ -260,13 +248,13 @@
           </article>
 
           <article class="pricing-card pricing-card-accelerated">
-            <p class="pricing-pace">2× weekly lessons</p>
+            <p class="pricing-pace">60-minute weekly lesson</p>
             <h3 class="pricing-name">Accelerated</h3>
             <p class="pricing-price"><span class="price-amount">$579</span><span class="price-period">/month</span></p>
             <ul class="pricing-features">
-              <li>Two private in-home lessons per week</li>
+              <li>One extended 60-minute in-home lesson per week</li>
+              <li>Double the lesson time for faster progress</li>
               <li>Priority scheduling, any day</li>
-              <li>Fastest path to their next favorite song</li>
               <li>Full bonus stack included ($230+ value)</li>
             </ul>
             <a href="#contact" class="btn btn-outline btn-block">Free Trial Lesson</a>
@@ -587,14 +575,13 @@
     "description": "In-home piano lessons for kids and beginners in Metro Detroit. Free trial lesson.",
     "url": "https://www.pianolessonsmi.com/",
     "telephone": "+1-248-607-1916",
-    "priceRange": "$279-$579",
+    "priceRange": "$329-$579",
     "aggregateRating": {"@type": "AggregateRating", "ratingValue": "5", "reviewCount": "4"},
     "address": {"@type": "PostalAddress", "addressLocality": "Troy", "addressRegion": "MI", "postalCode": "48084", "addressCountry": "US"},
     "areaServed": ["Troy MI", "Rochester Hills MI", "Birmingham MI", "Royal Oak MI", "Bloomfield Hills MI"],
     "makesOffer": [
-      {"@type": "Offer", "name": "Essentials", "price": "279", "priceCurrency": "USD", "description": "Weekly private in-home piano lesson with full bonus stack included."},
-      {"@type": "Offer", "name": "Premium", "price": "329", "priceCurrency": "USD", "description": "Weekly private in-home piano lesson with priority scheduling, annual recital slot, and full bonus stack."},
-      {"@type": "Offer", "name": "Accelerated", "price": "579", "priceCurrency": "USD", "description": "Two private in-home piano lessons per week with priority scheduling and full bonus stack."}
+      {"@type": "Offer", "name": "Weekly", "price": "329", "priceCurrency": "USD", "description": "Weekly private in-home piano lesson with priority scheduling, annual recital slot, and full bonus stack."},
+      {"@type": "Offer", "name": "Accelerated", "price": "579", "priceCurrency": "USD", "description": "One extended 60-minute private in-home piano lesson per week with priority scheduling and full bonus stack."}
     ]
   }
   </script>
