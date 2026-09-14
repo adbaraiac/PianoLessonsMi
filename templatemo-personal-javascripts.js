@@ -15,7 +15,7 @@ const META_PIXEL_ID = '1089866153420965';
 // AW- Google Ads conversion ID above - both run through the same gtag.js
 // loader). Leave empty until a GA4 property exists; see index.html <head>
 // for where its config call goes once set.
-const GA4_MEASUREMENT_ID = '';
+const GA4_MEASUREMENT_ID = 'G-GX7EZGC3CS';
 
 function fireConversionTracking() {
   if (GOOGLE_ADS_SEND_TO && typeof gtag === 'function') {
