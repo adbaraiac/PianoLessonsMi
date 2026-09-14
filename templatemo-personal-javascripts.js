@@ -172,8 +172,6 @@ function initEnrollmentCountdown() {
 const BOOKING_PHONE = '+12486071916';
 const BOOKING_EMAIL = 'adbaraiac04@gmail.com';
 
-const TROY_NORTH_ZONE = 'troy-north';
-
 const AREA_LABELS = {
   'troy-north': 'Troy — near Long Lake / John R / Rochester Rd',
   'troy-other': 'Troy — other area',
@@ -187,8 +185,6 @@ const AREA_LABELS = {
 
 const DAY_OPTIONS = {
   saturday: { label: 'Saturday', zones: 'all', times: ['Morning (9am–12pm)', 'Midday (12–3pm)', 'Afternoon (3–6pm)', 'Evening (6–8pm)'] },
-  thursday: { label: 'Thursday (after 1pm)', zones: [TROY_NORTH_ZONE], times: ['1–3pm', '3–5pm', '5–7pm'] },
-  friday: { label: 'Friday (after 1pm)', zones: [TROY_NORTH_ZONE], times: ['1–3pm', '3–5pm', '5–7pm'] },
 };
 
 function availableDaysForArea(area) {
@@ -236,9 +232,7 @@ function initBookingForm() {
     setSelectOptions(daySelect, days.map((d) => ({ value: d.key, label: d.label })), 'Select a day');
     setSelectOptions(timeSelect, [], 'Select a day first');
 
-    areaNote.textContent = area === TROY_NORTH_ZONE
-      ? '✓ Great news—your area has Saturday, Thursday & Friday (after 1pm) availability.'
-      : 'Saturdays (all day) are available in your area. Thursday & Friday afternoons are currently reserved for the Long Lake / John R / Rochester Rd zone in Troy.';
+    areaNote.textContent = 'Saturdays (all day) are available in your area. We\'ll text you to confirm the exact time.';
   }
 
   function updateTimes() {
