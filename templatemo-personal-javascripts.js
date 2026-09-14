@@ -11,6 +11,12 @@ const LEADS_API_URL = 'https://8qzuq3rfrk.execute-api.us-east-1.amazonaws.com';
 const GOOGLE_ADS_SEND_TO = 'AW-17704442079/_AnmCKDUqPMcEN-xkfpB';
 const META_PIXEL_ID = '1089866153420965';
 
+// GA4 property for session/pageview + funnel reporting (separate from the
+// AW- Google Ads conversion ID above - both run through the same gtag.js
+// loader). Leave empty until a GA4 property exists; see index.html <head>
+// for where its config call goes once set.
+const GA4_MEASUREMENT_ID = '';
+
 function fireConversionTracking() {
   if (GOOGLE_ADS_SEND_TO && typeof gtag === 'function') {
     gtag('event', 'conversion', { send_to: GOOGLE_ADS_SEND_TO });
@@ -18,6 +24,30 @@ function fireConversionTracking() {
   if (META_PIXEL_ID && typeof fbq === 'function') {
     fbq('track', 'Lead');
   }
+}
+
+// Funnel visibility: fires once per visit, the first time the booking form
+// scrolls into view, so we can see clicks -> landing -> reached form -> lead.
+function initBookingFormReachedTracking() {
+  const form = document.getElementById('bookingForm');
+  if (!form || typeof IntersectionObserver === 'undefined') return;
+
+  let fired = false;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting && !fired) {
+        fired = true;
+        if (GA4_MEASUREMENT_ID && typeof gtag === 'function') {
+          gtag('event', 'reached_booking_form');
+        }
+        if (META_PIXEL_ID && typeof fbq === 'function') {
+          fbq('trackCustom', 'ReachedBookingForm');
+        }
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+  observer.observe(form);
 }
 
 const mobileMenuToggle = document.getElementById('mobileMenuToggle');
@@ -96,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTestimonialCarousel();
   initStickyMobileCta();
   initBookingForm();
+  initBookingFormReachedTracking();
   initEnrollmentCountdown();
 });
 
