@@ -46,6 +46,7 @@ function renderLead(lead, token, justSaved) {
       <dt>Phone</dt><dd>${escapeHtml(lead.parentPhone)}</dd>
       <dt>Favorite song</dt><dd>${escapeHtml(lead.favoriteSong || '—')}</dd>
       <dt>Area</dt><dd>${escapeHtml(lead.area)}</dd>
+      <dt>Address</dt><dd>${escapeHtml(lead.address || '—')}</dd>
       <dt>Requested</dt><dd>${escapeHtml(lead.day)} — ${escapeHtml(lead.time)}</dd>
       <dt>Notes</dt><dd>${escapeHtml(lead.notes || '—')}</dd>
     </dl>

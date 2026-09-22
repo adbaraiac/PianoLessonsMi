@@ -9,9 +9,13 @@ function jsonResponse(statusCode, body) {
 }
 
 const REQUIRED_FIELDS = ['parentName', 'parentPhone', 'childName', 'childAge', 'area', 'day', 'time'];
+// Stored but not required, so a parent on a cached copy of the old form still
+// books successfully instead of hitting a validation error.
+const OPTIONAL_FIELDS = ['parentEmail', 'favoriteSong', 'notes', 'address', 'priceAcknowledged'];
 const MAX_LENGTHS = {
   parentName: 200, parentPhone: 40, parentEmail: 200, childName: 200, childAge: 10,
-  favoriteSong: 300, area: 100, day: 40, time: 40, notes: 1000,
+  favoriteSong: 300, area: 100, address: 300, day: 40, time: 40, notes: 1000,
+  priceAcknowledged: 10,
 };
 
 function clean(value, field) {
@@ -50,7 +54,7 @@ exports.handler = async (event) => {
     assignedTeacher: '',
     displacementNote: '',
   };
-  REQUIRED_FIELDS.concat(['parentEmail', 'favoriteSong', 'notes']).forEach((field) => {
+  REQUIRED_FIELDS.concat(OPTIONAL_FIELDS).forEach((field) => {
     lead[field] = clean(data[field], field);
   });
 
@@ -65,11 +69,13 @@ exports.handler = async (event) => {
   const apiBaseUrl = domainName ? `https://${domainName}` : '';
   const link = `${apiBaseUrl}/leads/${id}?token=${token}`;
   const message = [
-    'New free trial lesson request!',
+    'New free trial lesson booked!',
+    `${lead.day} at ${lead.time}`,
     `${lead.childName} (${lead.childAge}) - ${lead.parentName}, ${lead.parentPhone}`,
-    lead.favoriteSong ? `Favorite song: ${lead.favoriteSong}` : null,
+    lead.address ? `Address: ${lead.address}` : null,
     `Area: ${lead.area}`,
-    `Preferred: ${lead.day} - ${lead.time}`,
+    lead.favoriteSong ? `Favorite song: ${lead.favoriteSong}` : null,
+    lead.priceAcknowledged === 'yes' ? 'Pricing: acknowledged before booking' : null,
     lead.notes ? `Notes: ${lead.notes}` : null,
     `Log it: ${link}`,
   ].filter(Boolean).join('\n');

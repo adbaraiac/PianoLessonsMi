@@ -183,14 +183,45 @@ const AREA_LABELS = {
   'other': 'Other / not listed',
 };
 
-const DAY_OPTIONS = {
-  saturday: { label: 'Saturday', zones: 'all', times: ['Morning (9am–12pm)', 'Midday (12–3pm)', 'Afternoon (3–6pm)', 'Evening (6–8pm)'] },
+// Bookable availability. This is the only place to edit it: delete a time to
+// take it off the board, add a day key to open a new one. A day with an empty
+// times array shows as fully booked instead of disappearing.
+const BOOKING_SLOTS = {
+  saturday: {
+    label: 'Saturday',
+    times: [
+      '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+      '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM',
+      '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM',
+    ],
+  },
 };
 
-function availableDaysForArea(area) {
-  return Object.entries(DAY_OPTIONS)
-    .filter(([, cfg]) => cfg.zones === 'all' || cfg.zones.includes(area))
-    .map(([key, cfg]) => ({ key, label: cfg.label }));
+function slotInputId(prefix, value) {
+  return `${prefix}-${value.replace(/[^a-z0-9]/gi, '').toLowerCase()}`;
+}
+
+// Radios rather than a custom widget: native form validation, keyboard
+// support and FormData all work without reimplementing them.
+function renderChoice(container, { name, value, label, className, checked, onChange }) {
+  const id = slotInputId(name, value);
+  const input = document.createElement('input');
+  input.type = 'radio';
+  input.name = name;
+  input.id = id;
+  input.value = value;
+  input.required = true;
+  input.className = 'choice-input';
+  input.checked = Boolean(checked);
+  if (onChange) input.addEventListener('change', onChange);
+
+  const labelEl = document.createElement('label');
+  labelEl.className = className;
+  labelEl.setAttribute('for', id);
+  labelEl.textContent = label;
+
+  container.append(input, labelEl);
+  return input;
 }
 
 function initBookingForm() {
@@ -199,54 +230,44 @@ function initBookingForm() {
 
   const areaSelect = document.getElementById('area');
   const areaNote = document.getElementById('areaNote');
-  const daySelect = document.getElementById('day');
-  const timeSelect = document.getElementById('time');
+  const dayPills = document.getElementById('dayPills');
+  const slotGrid = document.getElementById('slotGrid');
+  const slotNote = document.getElementById('slotNote');
 
-  function setSelectOptions(select, options, placeholder) {
-    select.innerHTML = '';
-    const ph = document.createElement('option');
-    ph.value = '';
-    ph.disabled = true;
-    ph.selected = true;
-    ph.textContent = placeholder;
-    select.appendChild(ph);
-    options.forEach((opt) => {
-      const el = document.createElement('option');
-      el.value = opt.value;
-      el.textContent = opt.label;
-      select.appendChild(el);
+  function renderSlots(dayKey) {
+    const cfg = BOOKING_SLOTS[dayKey];
+    slotGrid.innerHTML = '';
+    if (!cfg || !cfg.times.length) {
+      slotNote.textContent = cfg
+        ? `${cfg.label} is fully booked right now—send a request below and we'll offer you the next opening.`
+        : 'Pick a day to see open times.';
+      return;
+    }
+    cfg.times.forEach((time) => {
+      renderChoice(slotGrid, { name: 'time', value: time, label: time, className: 'slot' });
     });
-    select.disabled = options.length === 0;
+    slotNote.textContent = `${cfg.times.length} open times this week. Lessons are 30 minutes.`;
   }
 
-  function updateDays() {
-    const area = areaSelect.value;
-    if (!area) {
-      setSelectOptions(daySelect, [], 'Select your area first');
-      setSelectOptions(timeSelect, [], 'Select a day first');
-      areaNote.textContent = '';
-      return;
-    }
+  const dayKeys = Object.keys(BOOKING_SLOTS);
+  dayKeys.forEach((key, i) => {
+    renderChoice(dayPills, {
+      name: 'day',
+      value: key,
+      label: BOOKING_SLOTS[key].label,
+      className: 'pill',
+      // With one day open there is nothing to choose - preselect it so the
+      // parent has one less tap between them and a booked lesson.
+      checked: dayKeys.length === 1 && i === 0,
+      onChange: () => renderSlots(key),
+    });
+  });
+  renderSlots(dayKeys.length === 1 ? dayKeys[0] : null);
 
-    const days = availableDaysForArea(area);
-    setSelectOptions(daySelect, days.map((d) => ({ value: d.key, label: d.label })), 'Select a day');
-    setSelectOptions(timeSelect, [], 'Select a day first');
-
-    areaNote.textContent = 'Saturdays (all day) are available in your area. We\'ll text you to confirm the exact time.';
-  }
-
-  function updateTimes() {
-    const day = daySelect.value;
-    const cfg = DAY_OPTIONS[day];
-    if (!cfg) {
-      setSelectOptions(timeSelect, [], 'Select a day first');
-      return;
-    }
-    setSelectOptions(timeSelect, cfg.times.map((t) => ({ value: t, label: t })), 'Select a time');
-  }
-
-  areaSelect.addEventListener('change', updateDays);
-  daySelect.addEventListener('change', updateTimes);
+  areaSelect.addEventListener('change', () => {
+    const label = AREA_LABELS[areaSelect.value];
+    areaNote.textContent = label ? `✓ We come to you in ${label.replace(/ —.*/, '')}.` : '';
+  });
 
   const confirmPanel = document.getElementById('bookingConfirm');
   const confirmName = document.getElementById('confirmName');
@@ -256,6 +277,7 @@ function initBookingForm() {
   const confirmEditBtn = document.getElementById('confirmEditBtn');
   const sentPanel = document.getElementById('bookingSent');
   const sentChildName = document.getElementById('sentChildName');
+  const sentSlot = document.getElementById('sentSlot');
 
   async function trySubmitToApi(data, areaLabel, dayLabel) {
     if (!LEADS_API_URL) return false;
@@ -270,9 +292,11 @@ function initBookingForm() {
           childAge: data.childAge,
           favoriteSong: data.favoriteSong || '',
           area: areaLabel,
+          address: data.address || '',
           day: dayLabel,
           time: data.time,
           notes: data.notes || '',
+          priceAcknowledged: data.priceAck === 'yes' ? 'yes' : 'no',
         }),
       });
       return res.ok;
@@ -283,14 +307,21 @@ function initBookingForm() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!form.reportValidity()) return;
+    if (!form.reportValidity()) {
+      // The form is long enough that a failed field - especially the slot
+      // grid, whose radios are visually hidden - can sit off-screen.
+      const firstInvalid = Array.from(form.elements).find((el) => el.willValidate && !el.checkValidity());
+      firstInvalid?.closest('.form-field, .form-block, .price-ack')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     // A validly completed booking form is the lead event ad platforms should
     // optimize toward, regardless of which notification path below succeeds.
     fireConversionTracking();
 
     const data = Object.fromEntries(new FormData(form).entries());
-    const dayLabel = DAY_OPTIONS[data.day]?.label || data.day;
+    const dayLabel = BOOKING_SLOTS[data.day]?.label || data.day;
     const areaLabel = AREA_LABELS[data.area] || data.area;
 
     const submitBtn = form.querySelector('button[type="submit"]');
@@ -300,6 +331,7 @@ function initBookingForm() {
 
     if (sentAutomatically) {
       sentChildName.textContent = data.childName || 'there';
+      sentSlot.textContent = `${dayLabel} at ${data.time}`;
       form.hidden = true;
       sentPanel.hidden = false;
       sentPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -314,7 +346,8 @@ function initBookingForm() {
       `Child: ${data.childName}, age ${data.childAge}`,
       data.favoriteSong ? `Favorite song: ${data.favoriteSong}` : null,
       `Area: ${areaLabel}`,
-      `Preferred: ${dayLabel} — ${data.time}`,
+      data.address ? `Address: ${data.address}` : null,
+      `Requested: ${dayLabel} at ${data.time}`,
       data.notes ? `Notes: ${data.notes}` : null,
     ].filter(Boolean);
 

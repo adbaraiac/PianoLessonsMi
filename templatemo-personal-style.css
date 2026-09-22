@@ -1343,6 +1343,133 @@ nav.scrolled {
   margin-top: 0.85rem;
 }
 
+/* ===== Day + time slot picker ===== */
+.form-block {
+  position: relative;
+  margin-bottom: 1.1rem;
+}
+
+.field-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin: 0 0 0.55rem;
+  color: var(--color-text);
+}
+
+/* Kept focusable (not display:none) so native required-field validation can
+   still target the group and browsers can move focus to it. */
+.choice-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pill,
+.slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  padding: 0.5rem 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.slot {
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.4rem;
+  font-size: 0.92rem;
+}
+
+.pill:hover,
+.slot:hover {
+  border-color: var(--color-accent-light);
+  background: var(--color-accent-soft);
+}
+
+.choice-input:checked + .pill,
+.choice-input:checked + .slot {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.choice-input:focus-visible + .pill,
+.choice-input:focus-visible + .slot {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 0.5rem;
+}
+
+/* ===== Pricing acknowledgement ===== */
+.price-ack {
+  background: var(--color-gold-soft);
+  border: 1.5px solid rgba(196, 165, 116, 0.4);
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1.25rem;
+  margin: 1.5rem 0 1.25rem;
+}
+
+.price-ack-head {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin: 0 0 0.5rem;
+  color: var(--color-text);
+}
+
+.price-ack p {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  margin: 0 0 0.75rem;
+}
+
+.price-ack-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  margin: 0;
+}
+
+.price-ack-check input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.sent-slot {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin: 0 0 0.5rem;
+}
+
 .booking-confirm {
   background: var(--color-accent-soft);
   border: 1px solid rgba(61, 92, 80, 0.2);

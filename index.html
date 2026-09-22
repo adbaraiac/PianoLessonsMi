@@ -57,7 +57,7 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
 
   <link rel="preload" href="/images/StudentsImage-cropped.jpg" as="image" />
-  <link href="/templatemo-personal-style.css?v=8" rel="stylesheet" type="text/css" />
+  <link href="/templatemo-personal-style.css?v=9" rel="stylesheet" type="text/css" />
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #faf9f7; color: #2c2c2e; }
     .btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0.85rem 1.5rem; background: #3d5c50; color: #fff; text-decoration: none; border-radius: 999px; font-weight: 600; }
@@ -474,7 +474,7 @@
       <div class="container container-narrow">
         <header class="section-header fade-in">
           <h2>Book Your Free Trial Lesson</h2>
-          <p class="section-lead section-lead-short">Tell us about your child and pick a time that works. We'll text to confirm within 24 hours—no account, no waiting on hold.</p>
+          <p class="section-lead section-lead-short">Pick a time below and your spot is booked. No account, no payment, no waiting on hold—Aiden texts you shortly to introduce your teacher.</p>
         </header>
 
         <form id="bookingForm" class="booking-form fade-in" novalidate>
@@ -521,19 +521,20 @@
             <p class="form-note" id="areaNote" aria-live="polite"></p>
           </div>
 
-          <div class="form-row">
-            <div class="form-field">
-              <label for="day">Preferred day</label>
-              <select id="day" name="day" required disabled>
-                <option value="" disabled selected>Select your area first</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label for="time">Preferred time</label>
-              <select id="time" name="time" required disabled>
-                <option value="" disabled selected>Select a day first</option>
-              </select>
-            </div>
+          <div class="form-field">
+            <label for="address">Street address <span class="form-optional">(so your teacher knows where to come)</span></label>
+            <input type="text" id="address" name="address" autocomplete="street-address" placeholder="123 Maple Ln, Bloomfield Hills, MI 48301" required />
+          </div>
+
+          <div class="form-block">
+            <p class="field-label">Pick your day</p>
+            <div class="pill-group" id="dayPills"></div>
+          </div>
+
+          <div class="form-block">
+            <p class="field-label">Pick your time</p>
+            <div class="slot-grid" id="slotGrid"></div>
+            <p class="form-note" id="slotNote" aria-live="polite"></p>
           </div>
 
           <div class="form-field">
@@ -541,8 +542,17 @@
             <textarea id="notes" name="notes" rows="2"></textarea>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-lg btn-block">Review &amp; Send Request</button>
-          <p class="form-note form-note-center">No payment or account needed—this just sends us your request.</p>
+          <div class="price-ack">
+            <p class="price-ack-head">Before you book—here's the part most places make you ask for</p>
+            <p>Your trial lesson is <strong>completely free</strong>, and you decide nothing until after you've met your teacher. If it's a great fit and you'd like to keep going, lessons are <strong>$329/month</strong> for weekly in-home lessons, or <strong>$579/month</strong> for the 60-minute Accelerated plan. Books, materials, recital, and travel to your door are all included.</p>
+            <label class="price-ack-check">
+              <input type="checkbox" id="priceAck" name="priceAck" value="yes" required />
+              <span>I've seen the pricing and I'm comfortable with it if my child and the teacher are a good fit.</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block">Confirm My Free Trial Lesson</button>
+          <p class="form-note form-note-center">No payment and no account needed—your spot is held as soon as you tap.</p>
         </form>
 
         <div id="bookingConfirm" class="booking-confirm fade-in" hidden>
@@ -557,8 +567,9 @@
         </div>
 
         <div id="bookingSent" class="booking-confirm fade-in" hidden>
-          <h3>Request sent, <span id="sentChildName"></span>!</h3>
-          <p>Thanks! We'll text you within 24 hours to confirm your exact time.</p>
+          <h3>You're booked, <span id="sentChildName"></span>!</h3>
+          <p class="sent-slot" id="sentSlot"></p>
+          <p>Thank you—your booking is confirmed. <strong>You'll receive a text from Aiden shortly</strong> to introduce your teacher and confirm the details.</p>
         </div>
 
         <div class="contact-actions fade-in" role="group" aria-label="Contact options">
@@ -630,6 +641,6 @@
   }
   </script>
 
-  <script src="/templatemo-personal-javascripts.js?v=11" defer></script>
+  <script src="/templatemo-personal-javascripts.js?v=12" defer></script>
 </body>
 </html>
