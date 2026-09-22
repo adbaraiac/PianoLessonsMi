@@ -17,12 +17,28 @@ const META_PIXEL_ID = '1089866153420965';
 // for where its config call goes once set.
 const GA4_MEASUREMENT_ID = 'G-GX7EZGC3CS';
 
+// The paid-conversion event. Only call this once an inquiry has actually
+// reached us - either the server confirmed the booking, or the parent tapped
+// the text/email fallback. Firing it on submit alone would count conversions
+// we never received, and ad budget gets decided off these numbers.
 function fireConversionTracking() {
   if (GOOGLE_ADS_SEND_TO && typeof gtag === 'function') {
     gtag('event', 'conversion', { send_to: GOOGLE_ADS_SEND_TO });
   }
   if (META_PIXEL_ID && typeof fbq === 'function') {
     fbq('track', 'Lead');
+  }
+}
+
+// A completed form that the server refused or never received. Tracked
+// separately so silent delivery failures are visible instead of being
+// laundered into the conversion count.
+function fireSubmitFailed() {
+  if (GA4_MEASUREMENT_ID && typeof gtag === 'function') {
+    gtag('event', 'booking_submit_failed');
+  }
+  if (META_PIXEL_ID && typeof fbq === 'function') {
+    fbq('trackCustom', 'BookingSubmitFailed');
   }
 }
 
@@ -133,7 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   anchor.addEventListener('click', function (e) {
     const href = this.getAttribute('href');
-    if (!href || href === '#') return;
+    // Re-checked at click time, not just at bind time: the booking fallback
+    // buttons start as href="#" and are rewritten to sms:/mailto: later, and
+    // passing one of those to querySelector throws.
+    if (!href || href === '#' || !href.startsWith('#')) return;
     const target = document.querySelector(href);
     if (!target) return;
     e.preventDefault();
@@ -305,6 +324,14 @@ function initBookingForm() {
     }
   }
 
+  // One conversion per inquiry, whichever path delivers it.
+  let conversionFired = false;
+  function fireConversionOnce() {
+    if (conversionFired) return;
+    conversionFired = true;
+    fireConversionTracking();
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!form.reportValidity()) {
@@ -316,10 +343,7 @@ function initBookingForm() {
       return;
     }
 
-    // A validly completed booking form is the lead event ad platforms should
-    // optimize toward, regardless of which notification path below succeeds.
-    fireConversionTracking();
-
+    conversionFired = false;
     const data = Object.fromEntries(new FormData(form).entries());
     const dayLabel = BOOKING_SLOTS[data.day]?.label || data.day;
     const areaLabel = AREA_LABELS[data.area] || data.area;
@@ -330,6 +354,8 @@ function initBookingForm() {
     if (submitBtn) submitBtn.disabled = false;
 
     if (sentAutomatically) {
+      // Confirmed received - this is a real inquiry, so count it.
+      fireConversionOnce();
       sentChildName.textContent = data.childName || 'there';
       sentSlot.textContent = `${dayLabel} at ${data.time}`;
       form.hidden = true;
@@ -339,7 +365,9 @@ function initBookingForm() {
     }
 
     // Backend not configured (LEADS_API_URL empty) or the request failed -
-    // fall back to letting the parent send the request themselves.
+    // fall back to letting the parent send the request themselves. No
+    // conversion yet: it counts only if they actually send the message.
+    fireSubmitFailed();
     const lines = [
       `Hi! I'd like to book a free trial piano lesson.`,
       `Parent: ${data.parentName} (${data.parentPhone})`,
@@ -361,6 +389,19 @@ function initBookingForm() {
     form.hidden = true;
     confirmPanel.hidden = false;
     confirmPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  // Tapping one of these opens the parent's messaging app with the request
+  // prefilled - that is the inquiry actually reaching us, so it counts here.
+  [confirmSmsLink, confirmEmailLink].forEach((link) => {
+    link?.addEventListener('click', fireConversionOnce);
+  });
+
+  // A question is a softer signal than a booking, so it is tracked on its own
+  // rather than counted as a paid conversion.
+  document.getElementById('askQuestionLink')?.addEventListener('click', () => {
+    if (GA4_MEASUREMENT_ID && typeof gtag === 'function') gtag('event', 'asked_question');
+    if (META_PIXEL_ID && typeof fbq === 'function') fbq('trackCustom', 'AskedQuestion');
   });
 
   confirmEditBtn?.addEventListener('click', () => {
