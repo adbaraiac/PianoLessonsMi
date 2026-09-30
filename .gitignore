@@ -1,3 +1,6 @@
 backend/.aws-sam/
 backend/src/node_modules/
 .claude/
+
+# Local-only notes: contain AWS account/resource IDs, never commit (repo is public)
+*.local.md
