@@ -214,6 +214,12 @@ const BOOKING_SLOTS = {
       '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM',
     ],
   },
+  thursday: {
+    label: 'Thursday',
+    times: [
+      '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM', '6:00 PM', '6:30 PM', '7:00 PM',
+    ],
+  },
 };
 
 function slotInputId(prefix, value) {
