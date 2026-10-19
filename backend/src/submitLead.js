@@ -8,13 +8,17 @@ function jsonResponse(statusCode, body) {
   return { statusCode, headers: RESPONSE_HEADERS, body: JSON.stringify(body) };
 }
 
-const REQUIRED_FIELDS = ['parentName', 'parentPhone', 'childName', 'childAge', 'area', 'day', 'time'];
-// Stored but not required, so a parent on a cached copy of the old form still
-// books successfully instead of hitting a validation error.
-const OPTIONAL_FIELDS = ['parentEmail', 'favoriteSong', 'notes', 'address', 'priceAcknowledged'];
+const REQUIRED_FIELDS = ['parentName', 'parentPhone', 'childAge', 'address', 'day'];
+// Stored but not required, so a parent on a cached copy of an older form still
+// books successfully instead of hitting a validation error. childName, area and
+// time live here because the form now asks which days work rather than locking a
+// specific slot - older cached copies still send them.
+const OPTIONAL_FIELDS = [
+  'parentEmail', 'childName', 'favoriteSong', 'area', 'time', 'notes', 'priceAcknowledged',
+];
 const MAX_LENGTHS = {
   parentName: 200, parentPhone: 40, parentEmail: 200, childName: 200, childAge: 10,
-  favoriteSong: 300, area: 100, address: 300, day: 40, time: 40, notes: 1000,
+  favoriteSong: 300, area: 100, address: 300, day: 120, time: 40, notes: 1000,
   priceAcknowledged: 10,
 };
 
@@ -68,12 +72,13 @@ exports.handler = async (event) => {
   const domainName = event.requestContext && event.requestContext.domainName;
   const apiBaseUrl = domainName ? `https://${domainName}` : '';
   const link = `${apiBaseUrl}/leads/${id}?token=${token}`;
+  const child = lead.childName ? `${lead.childName} (age ${lead.childAge})` : `Child age ${lead.childAge}`;
   const message = [
-    'New free trial lesson booked!',
-    `${lead.day} at ${lead.time}`,
-    `${lead.childName} (${lead.childAge}) - ${lead.parentName}, ${lead.parentPhone}`,
+    'New free trial lesson request!',
+    `Days that work: ${lead.day}${lead.time ? ` - ${lead.time}` : ''}`,
+    `${child} - ${lead.parentName}, ${lead.parentPhone}`,
     lead.address ? `Address: ${lead.address}` : null,
-    `Area: ${lead.area}`,
+    lead.area ? `Area: ${lead.area}` : null,
     lead.favoriteSong ? `Favorite song: ${lead.favoriteSong}` : null,
     lead.priceAcknowledged === 'yes' ? 'Pricing: acknowledged before booking' : null,
     lead.notes ? `Notes: ${lead.notes}` : null,

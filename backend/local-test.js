@@ -73,6 +73,7 @@ async function main() {
   console.log('3) valid submission -> 200, lead stored, email + SMS both "sent"');
   res = await submitLead.handler({ requestContext: { domainName: 'example.execute-api.us-east-1.amazonaws.com' }, body: JSON.stringify({
     parentName: 'Sarah Johnson', parentPhone: '2485551234', childName: 'Emma', childAge: '7',
+    address: '12 Maple Ln, Bloomfield Hills, MI',
     favoriteSong: 'Let It Go', area: 'Troy — near Long Lake / John R / Rochester Rd', day: 'saturday', time: 'Morning (9am–12pm)',
   }) });
   const body = JSON.parse(res.body);
@@ -87,6 +88,23 @@ async function main() {
   const leadId = body.id;
   const lead = fakeTables.Leads.get(leadId);
   const token = lead.token;
+
+  console.log('3b) new-style submission: multi-day, no childName/area/time -> 200');
+  {
+    const before = fakeTables.Leads.size;
+    const r = await submitLead.handler({ requestContext: { domainName: 'example.execute-api.us-east-1.amazonaws.com' }, body: JSON.stringify({
+      parentName: 'Priya Raman', parentPhone: '2485550188', childAge: '6',
+      address: '44 Birch Dr, Bloomfield Hills, MI', day: 'Monday, Saturday',
+      favoriteSong: 'Twinkle Twinkle', priceAcknowledged: 'yes',
+    }) });
+    assert(r.statusCode === 200 && JSON.parse(r.body).ok, 'minimal payload accepted');
+    assert(fakeTables.Leads.size === before + 1, 'lead written without childName/area/time');
+    const note = smsLog[smsLog.length - 1].Message;
+    assert(note.includes('Monday, Saturday'), 'notification lists the days that work');
+    assert(note.includes('Child age 6'), 'notification degrades gracefully with no child name');
+    assert(!note.includes('undefined'), 'no undefined leaks into the notification');
+    fakeTables.Leads.delete(JSON.parse(r.body).id);
+  }
 
   console.log('4) status page with wrong token -> 404');
   res = await leadStatusPage.handler({ pathParameters: { id: leadId }, requestContext: { http: { method: 'GET' } }, queryStringParameters: { token: 'wrong' } });
@@ -108,6 +126,7 @@ async function main() {
   console.log('7) new lead used for displacement scenario');
   res = await submitLead.handler({ requestContext: { domainName: 'example.execute-api.us-east-1.amazonaws.com' }, body: JSON.stringify({
     parentName: 'Jason', parentPhone: '2485559999', childName: 'Max', childAge: '9',
+    address: '8 Oak St, Troy, MI',
     area: 'Troy — near Long Lake / John R / Rochester Rd', day: 'saturday', time: 'Afternoon (3–6pm)',
   }) });
   const lead2Id = JSON.parse(res.body).id;
@@ -133,6 +152,7 @@ async function main() {
   // Re-run scenario 8 fresh with a third lead to check the other branch in isolation.
   res = await submitLead.handler({ requestContext: { domainName: 'example.execute-api.us-east-1.amazonaws.com' }, body: JSON.stringify({
     parentName: 'Dana', parentPhone: '2485557777', childName: 'Lily', childAge: '6',
+    address: '3 Elm Rd, Royal Oak, MI',
     area: 'Troy — near Long Lake / John R / Rochester Rd', day: 'saturday', time: 'Evening (6–8pm)',
   }) });
   const lead3Id = JSON.parse(res.body).id;

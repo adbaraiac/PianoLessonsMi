@@ -1420,6 +1420,59 @@ nav.scrolled {
   gap: 0.5rem;
 }
 
+/* ===== Day preference checkboxes ===== */
+.field-hint {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: -0.35rem 0 0.7rem;
+}
+
+.day-choices {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.day-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: var(--tap-min);
+  padding: 0.65rem 1rem;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.day-choice:hover { border-color: var(--color-accent-light); }
+
+.day-choice input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.day-choice:has(input:checked) {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.day-choice:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.day-choice-note {
+  display: block;
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
 /* ===== Pricing acknowledgement ===== */
 .price-ack {
   background: var(--color-gold-soft);

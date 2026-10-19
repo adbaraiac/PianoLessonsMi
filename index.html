@@ -57,7 +57,7 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
 
   <link rel="preload" href="/images/StudentsImage-cropped.jpg" as="image" />
-  <link href="/templatemo-personal-style.css?v=11" rel="stylesheet" type="text/css" />
+  <link href="/templatemo-personal-style.css?v=12" rel="stylesheet" type="text/css" />
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #faf9f7; color: #2c2c2e; }
     .btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0.85rem 1.5rem; background: #3d5c50; color: #fff; text-decoration: none; border-radius: 999px; font-weight: 600; }
@@ -493,7 +493,7 @@
         <form id="bookingForm" class="booking-form fade-in" novalidate>
           <div class="form-row">
             <div class="form-field">
-              <label for="parentName">Your name</label>
+              <label for="parentName">Parent&rsquo;s name</label>
               <input type="text" id="parentName" name="parentName" autocomplete="name" required />
             </div>
             <div class="form-field">
@@ -502,70 +502,44 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-field">
-              <label for="childName">Child's name</label>
-              <input type="text" id="childName" name="childName" required />
-            </div>
-            <div class="form-field">
-              <label for="childAge">Child's age</label>
-              <input type="number" id="childAge" name="childAge" min="3" max="99" inputmode="numeric" required />
-            </div>
+          <div class="form-field">
+            <label for="childAge">Child&rsquo;s age</label>
+            <input type="number" id="childAge" name="childAge" min="3" max="99" inputmode="numeric" required />
           </div>
 
           <div class="form-field">
-            <label for="favoriteSong">Child's favorite song <span class="form-optional">(so we can prep it for lesson one)</span></label>
-            <input type="text" id="favoriteSong" name="favoriteSong" placeholder="e.g. Twinkle Twinkle, a movie theme, a pop song..." />
-          </div>
-
-          <div class="form-field">
-            <label for="area">Your area</label>
-            <select id="area" name="area" required>
-              <option value="" disabled selected>Select your area</option>
-              <option value="troy-north">Troy — near Long Lake / John R / Rochester Rd</option>
-              <option value="troy-other">Troy — other area</option>
-              <option value="rochester-hills">Rochester Hills</option>
-              <option value="rochester">Rochester</option>
-              <option value="birmingham">Birmingham</option>
-              <option value="royal-oak">Royal Oak</option>
-              <option value="bloomfield-hills">Bloomfield Hills</option>
-              <option value="other">Other / not listed</option>
-            </select>
-            <p class="form-note" id="areaNote" aria-live="polite"></p>
-          </div>
-
-          <div class="form-field">
-            <label for="address">Street address <span class="form-optional">(so your teacher knows where to come)</span></label>
+            <label for="address">Home address <span class="form-optional">(so your teacher knows where to come)</span></label>
             <input type="text" id="address" name="address" autocomplete="street-address" placeholder="123 Maple Ln, Bloomfield Hills, MI 48301" required />
           </div>
 
-          <div class="form-block">
-            <p class="field-label">Pick your day</p>
-            <div class="pill-group" id="dayPills"></div>
+          <div class="form-field">
+            <label for="favoriteSong">Child&rsquo;s favorite song <span class="form-optional">(optional &mdash; so we can prep it for lesson one)</span></label>
+            <input type="text" id="favoriteSong" name="favoriteSong" placeholder="e.g. Twinkle Twinkle, a movie theme, a pop song..." />
           </div>
 
           <div class="form-block">
-            <p class="field-label">Pick your time</p>
-            <div class="slot-grid" id="slotGrid"></div>
-            <p class="form-note" id="slotNote" aria-live="polite"></p>
+            <p class="field-label">Which days work for your family?</p>
+            <p class="field-hint">Select all that work. We&rsquo;ll confirm an available time by text.</p>
+            <div class="day-choices" id="dayChoices"></div>
+            <p class="form-note" id="dayNote" aria-live="polite"></p>
           </div>
 
           <div class="form-field">
             <label for="notes">Anything else we should know? <span class="form-optional">(optional)</span></label>
-            <textarea id="notes" name="notes" rows="2"></textarea>
+            <textarea id="notes" name="notes" rows="2" placeholder="Allergies, what motivates them, a sibling who&rsquo;d also like lessons..."></textarea>
           </div>
 
           <div class="price-ack">
-            <p class="price-ack-head">Before you book—here's the part most places make you ask for</p>
-            <p>Your kit and first lesson are <strong>free</strong>, and you decide nothing until after you've met your teacher. If you'd like to keep going, lessons are <strong>$349/month</strong> weekly, or <strong>$579/month</strong> for the 60-minute Accelerated plan—books, materials, recital, and travel to your door all included.</p>
+            <p class="price-ack-head">Before you book&mdash;here&rsquo;s the part most places make you ask for</p>
+            <p>Your kit and first lesson are <strong>free</strong>, and you decide nothing until after you&rsquo;ve met your teacher. If you&rsquo;d like to keep going, lessons are <strong>$349/month</strong> weekly, or <strong>$579/month</strong> for the 60-minute Accelerated plan&mdash;books, materials, recital, and travel to your door all included.</p>
             <label class="price-ack-check">
               <input type="checkbox" id="priceAck" name="priceAck" value="yes" required />
-              <span>I've seen the pricing and I'm comfortable with it if my child and the teacher are a good fit.</span>
+              <span>I&rsquo;ve seen the pricing and I&rsquo;m comfortable with it if my child and the teacher are a good fit.</span>
             </label>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-lg btn-block">Book My Free First Song Lesson</button>
-          <p class="form-note form-note-center">No payment and no account needed—your spot is held as soon as you tap.</p>
+          <button type="submit" class="btn btn-primary btn-lg btn-block">Request My FREE Trial Lesson</button>
+          <p class="form-note form-note-center">No credit card required. We&rsquo;ll text you to confirm your lesson time.</p>
         </form>
 
         <p class="form-alt fade-in">Not ready to book yet? <a id="askQuestionLink" href="sms:+12486071916?body=Hi%20Aiden!%20I%20have%20a%20question%20about%20piano%20lessons%3A%20">Text Aiden a question</a>—no pressure, and you'll hear back from a real person.</p>
@@ -582,9 +556,9 @@
         </div>
 
         <div id="bookingSent" class="booking-confirm fade-in" hidden>
-          <h3>You're booked, <span id="sentChildName"></span>!</h3>
+          <h3>Request sent!</h3>
           <p class="sent-slot" id="sentSlot"></p>
-          <p>Thank you—your booking is confirmed. <strong>You'll receive a text from Aiden shortly</strong> to introduce your teacher and confirm the details.</p>
+          <p>Thank you&mdash;<strong>you'll receive a text from Aiden shortly</strong> to confirm your lesson time and introduce your teacher.</p>
         </div>
 
         <div class="contact-actions fade-in" role="group" aria-label="Contact options">
@@ -656,6 +630,6 @@
   }
   </script>
 
-  <script src="/templatemo-personal-javascripts.js?v=17" defer></script>
+  <script src="/templatemo-personal-javascripts.js?v=18" defer></script>
 </body>
 </html>

@@ -191,108 +191,90 @@ function initEnrollmentCountdown() {
 const BOOKING_PHONE = '+12486071916';
 const BOOKING_EMAIL = 'adbaraiac04@gmail.com';
 
-const AREA_LABELS = {
-  'troy-north': 'Troy — near Long Lake / John R / Rochester Rd',
-  'troy-other': 'Troy — other area',
-  'rochester-hills': 'Rochester Hills',
-  'rochester': 'Rochester',
-  'birmingham': 'Birmingham',
-  'royal-oak': 'Royal Oak',
-  'bloomfield-hills': 'Bloomfield Hills',
-  'other': 'Other / not listed',
-};
 
 // Bookable availability. This is the only place to edit it: delete a time to
 // take it off the board, add a day key to open a new one. A day with an empty
 // times array shows as fully booked instead of disappearing.
-const BOOKING_SLOTS = {
-  saturday: {
-    label: 'Saturday',
-    times: [
-      '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
-      '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM',
-      '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM',
-    ],
-  },
-  thursday: {
-    label: 'Thursday',
-    times: [
-      '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM', '6:00 PM', '6:30 PM', '7:00 PM',
-    ],
-  },
-};
+// Bookable days. Edit this list to open or close a day - the checkboxes, the
+// hint text and the confirmation all follow. The form asks which days work
+// rather than locking a specific slot, because teacher availability shifts and
+// a slot grid promises times we cannot actually verify.
+const BOOKING_DAYS = [
+  { value: 'Monday', label: 'Monday', note: 'after 4pm' },
+  { value: 'Thursday', label: 'Thursday', note: 'after 4pm' },
+  { value: 'Saturday', label: 'Saturday', note: 'all day' },
+];
 
-function slotInputId(prefix, value) {
+// Chosen when none of the listed days work, so a parent who would otherwise
+// abandon the form still reaches us.
+const NO_DAY_VALUE = 'None of these - contact me about alternatives';
+
+function choiceInputId(prefix, value) {
   return `${prefix}-${value.replace(/[^a-z0-9]/gi, '').toLowerCase()}`;
-}
-
-// Radios rather than a custom widget: native form validation, keyboard
-// support and FormData all work without reimplementing them.
-function renderChoice(container, { name, value, label, className, checked, onChange }) {
-  const id = slotInputId(name, value);
-  const input = document.createElement('input');
-  input.type = 'radio';
-  input.name = name;
-  input.id = id;
-  input.value = value;
-  input.required = true;
-  input.className = 'choice-input';
-  input.checked = Boolean(checked);
-  if (onChange) input.addEventListener('change', onChange);
-
-  const labelEl = document.createElement('label');
-  labelEl.className = className;
-  labelEl.setAttribute('for', id);
-  labelEl.textContent = label;
-
-  container.append(input, labelEl);
-  return input;
 }
 
 function initBookingForm() {
   const form = document.getElementById('bookingForm');
   if (!form) return;
 
-  const areaSelect = document.getElementById('area');
-  const areaNote = document.getElementById('areaNote');
-  const dayPills = document.getElementById('dayPills');
-  const slotGrid = document.getElementById('slotGrid');
-  const slotNote = document.getElementById('slotNote');
+  const dayChoices = document.getElementById('dayChoices');
+  const dayNote = document.getElementById('dayNote');
 
-  function renderSlots(dayKey) {
-    const cfg = BOOKING_SLOTS[dayKey];
-    slotGrid.innerHTML = '';
-    if (!cfg || !cfg.times.length) {
-      slotNote.textContent = cfg
-        ? `${cfg.label} is fully booked right now—send a request below and we'll offer you the next opening.`
-        : 'Pick a day to see open times.';
-      return;
-    }
-    cfg.times.forEach((time) => {
-      renderChoice(slotGrid, { name: 'time', value: time, label: time, className: 'slot' });
-    });
-    slotNote.textContent = `${cfg.times.length} open times this week. Lessons are 30 minutes.`;
+  // A checkbox group has no native "at least one" rule - `required` on a
+  // checkbox only demands that box. So every box carries `required` until one
+  // is ticked, which makes reportValidity() enforce the group correctly.
+  function syncDayValidity() {
+    const boxes = Array.from(form.querySelectorAll('input[name="day"]'));
+    const anyChecked = boxes.some((b) => b.checked);
+    boxes.forEach((b) => { b.required = !anyChecked; });
+
+    const picked = boxes.filter((b) => b.checked).map((b) => b.value);
+    if (!picked.length) dayNote.textContent = '';
+    else if (picked.includes(NO_DAY_VALUE)) dayNote.textContent = "No problem - we'll text you about other options.";
+    else dayNote.textContent = `✓ We'll text you to confirm a time on ${picked.join(' or ')}.`;
   }
 
-  const dayKeys = Object.keys(BOOKING_SLOTS);
-  dayKeys.forEach((key, i) => {
-    renderChoice(dayPills, {
-      name: 'day',
-      value: key,
-      label: BOOKING_SLOTS[key].label,
-      className: 'pill',
-      // With one day open there is nothing to choose - preselect it so the
-      // parent has one less tap between them and a booked lesson.
-      checked: dayKeys.length === 1 && i === 0,
-      onChange: () => renderSlots(key),
-    });
-  });
-  renderSlots(dayKeys.length === 1 ? dayKeys[0] : null);
+  function addDayChoice(value, label, note) {
+    const id = choiceInputId('day', value);
+    const wrap = document.createElement('label');
+    wrap.className = 'day-choice';
+    wrap.setAttribute('for', id);
 
-  areaSelect.addEventListener('change', () => {
-    const label = AREA_LABELS[areaSelect.value];
-    areaNote.textContent = label ? `✓ We come to you in ${label.replace(/ —.*/, '')}.` : '';
-  });
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.name = 'day';
+    input.id = id;
+    input.value = value;
+    input.required = true;
+
+    input.addEventListener('change', () => {
+      // "None of these" contradicts picking a real day, so the two are
+      // mutually exclusive rather than silently sending both.
+      const boxes = Array.from(form.querySelectorAll('input[name="day"]'));
+      if (input.checked) {
+        if (value === NO_DAY_VALUE) boxes.forEach((b) => { if (b !== input) b.checked = false; });
+        else boxes.forEach((b) => { if (b.value === NO_DAY_VALUE) b.checked = false; });
+      }
+      syncDayValidity();
+    });
+
+    const text = document.createElement('span');
+    text.className = 'day-choice-label';
+    text.textContent = label;
+    if (note) {
+      const small = document.createElement('span');
+      small.className = 'day-choice-note';
+      small.textContent = note;
+      text.appendChild(small);
+    }
+
+    wrap.append(input, text);
+    dayChoices.appendChild(wrap);
+  }
+
+  BOOKING_DAYS.forEach((d) => addDayChoice(d.value, d.label, d.note));
+  addDayChoice(NO_DAY_VALUE, 'None of these', 'contact me about alternatives');
+  syncDayValidity();
 
   const confirmPanel = document.getElementById('bookingConfirm');
   const confirmName = document.getElementById('confirmName');
@@ -301,10 +283,9 @@ function initBookingForm() {
   const confirmEmailLink = document.getElementById('confirmEmailLink');
   const confirmEditBtn = document.getElementById('confirmEditBtn');
   const sentPanel = document.getElementById('bookingSent');
-  const sentChildName = document.getElementById('sentChildName');
   const sentSlot = document.getElementById('sentSlot');
 
-  async function trySubmitToApi(data, areaLabel, dayLabel) {
+  async function trySubmitToApi(data, dayLabel) {
     if (!LEADS_API_URL) return false;
     try {
       const res = await fetch(`${LEADS_API_URL}/leads`, {
@@ -313,13 +294,10 @@ function initBookingForm() {
         body: JSON.stringify({
           parentName: data.parentName,
           parentPhone: data.parentPhone,
-          childName: data.childName,
           childAge: data.childAge,
           favoriteSong: data.favoriteSong || '',
-          area: areaLabel,
           address: data.address || '',
           day: dayLabel,
-          time: data.time,
           notes: data.notes || '',
           priceAcknowledged: data.priceAck === 'yes' ? 'yes' : 'no',
         }),
@@ -350,20 +328,23 @@ function initBookingForm() {
     }
 
     conversionFired = false;
-    const data = Object.fromEntries(new FormData(form).entries());
-    const dayLabel = BOOKING_SLOTS[data.day]?.label || data.day;
-    const areaLabel = AREA_LABELS[data.area] || data.area;
+    const fd = new FormData(form);
+    const data = Object.fromEntries(fd.entries());
+    // getAll, not get - a parent can tick more than one day.
+    const pickedDays = fd.getAll('day');
+    const dayLabel = pickedDays.join(', ');
 
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
-    const sentAutomatically = await trySubmitToApi(data, areaLabel, dayLabel);
+    const sentAutomatically = await trySubmitToApi(data, dayLabel);
     if (submitBtn) submitBtn.disabled = false;
 
     if (sentAutomatically) {
       // Confirmed received - this is a real inquiry, so count it.
       fireConversionOnce();
-      sentChildName.textContent = data.childName || 'there';
-      sentSlot.textContent = `${dayLabel} at ${data.time}`;
+      sentSlot.textContent = pickedDays.includes(NO_DAY_VALUE)
+        ? "We'll text you about times outside our usual days."
+        : `You picked ${pickedDays.join(' or ')}`;
       form.hidden = true;
       sentPanel.hidden = false;
       sentPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -377,11 +358,10 @@ function initBookingForm() {
     const lines = [
       `Hi! I'd like to book a free trial piano lesson.`,
       `Parent: ${data.parentName} (${data.parentPhone})`,
-      `Child: ${data.childName}, age ${data.childAge}`,
+      `Child age: ${data.childAge}`,
       data.favoriteSong ? `Favorite song: ${data.favoriteSong}` : null,
-      `Area: ${areaLabel}`,
       data.address ? `Address: ${data.address}` : null,
-      `Requested: ${dayLabel} at ${data.time}`,
+      `Days that work: ${dayLabel}`,
       data.notes ? `Notes: ${data.notes}` : null,
     ].filter(Boolean);
 
