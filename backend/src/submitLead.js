@@ -18,7 +18,7 @@ const OPTIONAL_FIELDS = [
 ];
 const MAX_LENGTHS = {
   parentName: 200, parentPhone: 40, parentEmail: 200, childName: 200, childAge: 10,
-  favoriteSong: 300, area: 100, address: 300, day: 120, time: 40, notes: 1000,
+  favoriteSong: 300, area: 100, address: 300, day: 120, time: 120, notes: 1000,
   priceAcknowledged: 10,
 };
 

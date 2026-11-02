@@ -243,6 +243,15 @@ const BOOKING_DAYS = [
   { value: 'Saturday', label: 'Saturday', note: '4:30–8pm' },
 ];
 
+// Time bands rather than exact slots: 30-minute slots across six days would
+// be 46 checkboxes. Three bands are enough to match a parent to a teacher,
+// and the precise time gets settled in the text conversation.
+const BOOKING_TIMES = [
+  { value: 'After school', label: 'Right after school', note: 'around 4–5:30pm' },
+  { value: 'Early evening', label: 'Early evening', note: 'around 5:30–6:30pm' },
+  { value: 'Later evening', label: 'Later evening', note: 'around 6:30–8pm' },
+];
+
 // Chosen when none of the listed days work, so a parent who would otherwise
 // abandon the form still reaches us.
 const NO_DAY_VALUE = 'None of these - contact me about alternatives';
@@ -265,43 +274,55 @@ function initBookingForm() {
 
   const dayChoices = document.getElementById('dayChoices');
   const dayNote = document.getElementById('dayNote');
+  const timeGroup = document.getElementById('timeGroup');
+  const timeChoices = document.getElementById('timeChoices');
+
+  const boxesNamed = (name) => Array.from(form.querySelectorAll(`input[name="${name}"]`));
+  const pickedIn = (name) => boxesNamed(name).filter((b) => b.checked).map((b) => b.value);
 
   // A checkbox group has no native "at least one" rule - `required` on a
-  // checkbox only demands that box. So every box carries `required` until one
-  // is ticked, which makes reportValidity() enforce the group correctly.
-  function syncDayValidity() {
-    const boxes = Array.from(form.querySelectorAll('input[name="day"]'));
-    const anyChecked = boxes.some((b) => b.checked);
-    boxes.forEach((b) => { b.required = !anyChecked; });
-
-    const picked = boxes.filter((b) => b.checked).map((b) => b.value);
-    if (!picked.length) dayNote.textContent = '';
-    else if (picked.includes(NO_DAY_VALUE)) dayNote.textContent = "No problem - we'll text you about other options.";
-    else dayNote.textContent = `✓ We'll text you to confirm a time on ${joinWithOr(picked)}.`;
+  // checkbox only demands that box. So every box in a group stays required
+  // until one is ticked, which makes reportValidity() enforce the group.
+  function setGroupRequired(name, isRequired) {
+    const anyChecked = boxesNamed(name).some((b) => b.checked);
+    boxesNamed(name).forEach((b) => { b.required = isRequired && !anyChecked; });
   }
 
-  function addDayChoice(value, label, note) {
-    const id = choiceInputId('day', value);
+  function syncChoices() {
+    const days = pickedIn('day');
+    const optedOut = days.includes(NO_DAY_VALUE);
+
+    // Asking which times suit is pointless when none of our days work at all.
+    timeGroup.hidden = optedOut;
+    setGroupRequired('day', true);
+    setGroupRequired('time', !optedOut && days.length > 0);
+
+    if (!days.length) dayNote.textContent = '';
+    else if (optedOut) dayNote.textContent = "No problem - tell us below what would suit and we'll see what we can do.";
+    else dayNote.textContent = `✓ ${joinWithOr(days)}`;
+  }
+
+  function addChoice(container, name, value, label, note, exclusiveValue) {
+    const id = choiceInputId(name, value);
     const wrap = document.createElement('label');
     wrap.className = 'day-choice';
     wrap.setAttribute('for', id);
 
     const input = document.createElement('input');
     input.type = 'checkbox';
-    input.name = 'day';
+    input.name = name;
     input.id = id;
     input.value = value;
-    input.required = true;
 
     input.addEventListener('change', () => {
-      // "None of these" contradicts picking a real day, so the two are
-      // mutually exclusive rather than silently sending both.
-      const boxes = Array.from(form.querySelectorAll('input[name="day"]'));
-      if (input.checked) {
-        if (value === NO_DAY_VALUE) boxes.forEach((b) => { if (b !== input) b.checked = false; });
-        else boxes.forEach((b) => { if (b.value === NO_DAY_VALUE) b.checked = false; });
+      // An opt-out contradicts picking real options, so the two are mutually
+      // exclusive rather than silently sending both.
+      if (input.checked && exclusiveValue) {
+        const boxes = boxesNamed(name);
+        if (value === exclusiveValue) boxes.forEach((b) => { if (b !== input) b.checked = false; });
+        else boxes.forEach((b) => { if (b.value === exclusiveValue) b.checked = false; });
       }
-      syncDayValidity();
+      syncChoices();
     });
 
     const text = document.createElement('span');
@@ -315,12 +336,13 @@ function initBookingForm() {
     }
 
     wrap.append(input, text);
-    dayChoices.appendChild(wrap);
+    container.appendChild(wrap);
   }
 
-  BOOKING_DAYS.forEach((d) => addDayChoice(d.value, d.label, d.note));
-  addDayChoice(NO_DAY_VALUE, 'None of these', 'contact me about alternatives');
-  syncDayValidity();
+  BOOKING_DAYS.forEach((d) => addChoice(dayChoices, 'day', d.value, d.label, d.note, NO_DAY_VALUE));
+  addChoice(dayChoices, 'day', NO_DAY_VALUE, 'None of these', 'contact me about alternatives', NO_DAY_VALUE);
+  BOOKING_TIMES.forEach((t) => addChoice(timeChoices, 'time', t.value, t.label, t.note));
+  syncChoices();
 
   const confirmPanel = document.getElementById('bookingConfirm');
   const confirmName = document.getElementById('confirmName');
@@ -331,7 +353,7 @@ function initBookingForm() {
   const sentPanel = document.getElementById('bookingSent');
   const sentSlot = document.getElementById('sentSlot');
 
-  async function trySubmitToApi(data, dayLabel) {
+  async function trySubmitToApi(data, dayLabel, timeLabel) {
     if (!LEADS_API_URL) return false;
     try {
       const res = await fetch(`${LEADS_API_URL}/leads`, {
@@ -344,6 +366,7 @@ function initBookingForm() {
           favoriteSong: data.favoriteSong || '',
           address: data.address || '',
           day: dayLabel,
+          time: timeLabel,
           notes: data.notes || '',
           priceAcknowledged: data.priceAck === 'yes' ? 'yes' : 'no',
         }),
@@ -378,11 +401,13 @@ function initBookingForm() {
     const data = Object.fromEntries(fd.entries());
     // getAll, not get - a parent can tick more than one day.
     const pickedDays = fd.getAll('day');
+    const pickedTimes = fd.getAll('time');
     const dayLabel = pickedDays.join(', ');
+    const timeLabel = pickedTimes.join(', ');
 
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
-    const sentAutomatically = await trySubmitToApi(data, dayLabel);
+    const sentAutomatically = await trySubmitToApi(data, dayLabel, timeLabel);
     if (submitBtn) submitBtn.disabled = false;
 
     if (sentAutomatically) {
@@ -390,7 +415,7 @@ function initBookingForm() {
       fireConversionOnce();
       sentSlot.textContent = pickedDays.includes(NO_DAY_VALUE)
         ? "We'll text you about times outside our usual days."
-        : `You picked ${joinWithOr(pickedDays)}`;
+        : `${joinWithOr(pickedDays)}${pickedTimes.length ? ' — ' + joinWithOr(pickedTimes).toLowerCase() : ''}`;
       form.hidden = true;
       sentPanel.hidden = false;
       sentPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -408,6 +433,7 @@ function initBookingForm() {
       data.favoriteSong ? `Favorite song: ${data.favoriteSong}` : null,
       data.address ? `Address: ${data.address}` : null,
       `Days that work: ${dayLabel}`,
+      timeLabel ? `Times that work: ${timeLabel}` : null,
       data.notes ? `Notes: ${data.notes}` : null,
     ].filter(Boolean);
 
