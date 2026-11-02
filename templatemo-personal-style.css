@@ -1475,7 +1475,7 @@ nav.scrolled {
 }
 
 .day-choice-note::before {
-  content: "  b7 ";
+  content: " · ";
 }
 
 /* ===== Pricing acknowledgement ===== */
