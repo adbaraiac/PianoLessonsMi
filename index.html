@@ -57,7 +57,7 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
 
   <link rel="preload" href="/images/StudentsImage-cropped.jpg" as="image" />
-  <link href="/templatemo-personal-style.css?v=12" rel="stylesheet" type="text/css" />
+  <link href="/templatemo-personal-style.css?v=13" rel="stylesheet" type="text/css" />
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #faf9f7; color: #2c2c2e; }
     .btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0.85rem 1.5rem; background: #3d5c50; color: #fff; text-decoration: none; border-radius: 999px; font-weight: 600; }
@@ -68,7 +68,7 @@
 
   <!-- Enrollment window: update these dates each cycle, and only advertise a close date you will actually honor -->
   <div class="announcement-bar" role="note">
-    <p><strong>Fall enrollment closes Oct 28</strong>—next opening isn't until Nov 10. Every enrollment includes $300+ in books, materials &amp; extras. <a href="#pricing">See spots left →</a></p>
+    <p><strong>Only 5 enrollment spots left this season.</strong> Every enrollment includes $300+ in books, materials &amp; extras. <a href="#pricing">See spots left →</a></p>
   </div>
 
   <nav id="navbar" aria-label="Main navigation">
@@ -259,7 +259,10 @@
         </header>
         <div class="scarcity-banner fade-in">
           <p><strong>5 open enrollment spots</strong> left for Fall across all teachers—once they're filled, new students join the priority waitlist.<!-- Update this count to reflect real current capacity --></p>
-          <p class="scarcity-countdown" id="enrollmentCountdown" data-deadline="2026-10-28T23:59:59"><!-- Update data-deadline each enrollment cycle --></p>
+          <!-- Countdown removed: a lapsed deadline silently flipped this to
+               "Enrollment is closed" twice while ads were live. To bring it back,
+               restore <p class="scarcity-countdown" id="enrollmentCountdown"
+               data-deadline="YYYY-MM-DDT23:59:59"></p> and keep the date current. -->
         </div>
         <div class="pricing-grid pricing-grid-two fade-in stagger-children">
           <article class="pricing-card pricing-card-featured pricing-card-premium">
@@ -526,7 +529,7 @@
 
           <div class="form-field">
             <label for="notes">Anything else we should know? <span class="form-optional">(optional)</span></label>
-            <textarea id="notes" name="notes" rows="2" placeholder="Allergies, what motivates them, a sibling who&rsquo;d also like lessons..."></textarea>
+            <textarea id="notes" name="notes" rows="2" placeholder="What motivates them, how they learn best, a sibling who&rsquo;d also like lessons..."></textarea>
           </div>
 
           <div class="price-ack">
@@ -630,6 +633,6 @@
   }
   </script>
 
-  <script src="/templatemo-personal-javascripts.js?v=19" defer></script>
+  <script src="/templatemo-personal-javascripts.js?v=20" defer></script>
 </body>
 </html>

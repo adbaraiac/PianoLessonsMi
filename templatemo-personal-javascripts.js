@@ -235,14 +235,25 @@ const BOOKING_EMAIL = 'adbaraiac04@gmail.com';
 // rather than locking a specific slot, because teacher availability shifts and
 // a slot grid promises times we cannot actually verify.
 const BOOKING_DAYS = [
-  { value: 'Monday', label: 'Monday', note: 'after 4pm' },
-  { value: 'Thursday', label: 'Thursday', note: 'after 4pm' },
-  { value: 'Saturday', label: 'Saturday', note: 'all day' },
+  { value: 'Monday', label: 'Monday', note: '4–8pm' },
+  { value: 'Tuesday', label: 'Tuesday', note: '4–8pm' },
+  { value: 'Wednesday', label: 'Wednesday', note: '4–8pm' },
+  { value: 'Thursday', label: 'Thursday', note: '4–8pm' },
+  { value: 'Friday', label: 'Friday', note: '4:30–8pm' },
+  { value: 'Saturday', label: 'Saturday', note: '4:30–8pm' },
 ];
 
 // Chosen when none of the listed days work, so a parent who would otherwise
 // abandon the form still reaches us.
 const NO_DAY_VALUE = 'None of these - contact me about alternatives';
+
+// "Monday", "Monday or Friday", "Monday, Friday or Saturday" - chaining "or"
+// between every item reads badly once a parent picks three or more days.
+function joinWithOr(items) {
+  if (items.length <= 1) return items.join('');
+  if (items.length === 2) return items.join(' or ');
+  return items.slice(0, -1).join(', ') + ' or ' + items[items.length - 1];
+}
 
 function choiceInputId(prefix, value) {
   return `${prefix}-${value.replace(/[^a-z0-9]/gi, '').toLowerCase()}`;
@@ -266,7 +277,7 @@ function initBookingForm() {
     const picked = boxes.filter((b) => b.checked).map((b) => b.value);
     if (!picked.length) dayNote.textContent = '';
     else if (picked.includes(NO_DAY_VALUE)) dayNote.textContent = "No problem - we'll text you about other options.";
-    else dayNote.textContent = `✓ We'll text you to confirm a time on ${picked.join(' or ')}.`;
+    else dayNote.textContent = `✓ We'll text you to confirm a time on ${joinWithOr(picked)}.`;
   }
 
   function addDayChoice(value, label, note) {
@@ -379,7 +390,7 @@ function initBookingForm() {
       fireConversionOnce();
       sentSlot.textContent = pickedDays.includes(NO_DAY_VALUE)
         ? "We'll text you about times outside our usual days."
-        : `You picked ${pickedDays.join(' or ')}`;
+        : `You picked ${joinWithOr(pickedDays)}`;
       form.hidden = true;
       sentPanel.hidden = false;
       sentPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });

@@ -1437,7 +1437,7 @@ nav.scrolled {
   align-items: center;
   gap: 0.75rem;
   min-height: var(--tap-min);
-  padding: 0.65rem 1rem;
+  padding: 0.5rem 1rem;
   background: var(--color-bg);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -1466,11 +1466,16 @@ nav.scrolled {
   outline-offset: 2px;
 }
 
+/* Inline rather than stacked: with six days plus an opt-out, a two-line row
+   turned the group into half a screen of scrolling on a phone. */
 .day-choice-note {
-  display: block;
   font-weight: 400;
   font-size: 0.85rem;
   color: var(--color-text-muted);
+}
+
+.day-choice-note::before {
+  content: "  b7 ";
 }
 
 /* ===== Pricing acknowledgement ===== */
