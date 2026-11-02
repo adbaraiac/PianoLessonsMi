@@ -42,6 +42,40 @@ function fireSubmitFailed() {
   }
 }
 
+// Call/Text/Email taps. These are the quiet half of the funnel: a parent who
+// reads the whole page and then texts instead of filling the form has been
+// showing up in our data as a wasted ad click. Tracked as their own events,
+// deliberately NOT as the Lead conversion - tapping a tel: link only opens the
+// dialer, it does not prove a message was ever sent. Once we can compare these
+// counts against texts actually received, we can decide whether to promote them.
+const CONTACT_EVENTS = {
+  'tel:': { ga: 'clicked_call', meta: 'ClickedCall' },
+  'sms:': { ga: 'clicked_text', meta: 'ClickedText' },
+  'mailto:': { ga: 'clicked_email', meta: 'ClickedEmail' },
+};
+
+// These already report themselves: the booking fallback links count as the
+// conversion, and the question link has its own event.
+const SELF_TRACKED_LINKS = ['askQuestionLink', 'confirmSmsLink', 'confirmEmailLink'];
+
+function initContactTapTracking() {
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href^="tel:"], a[href^="sms:"], a[href^="mailto:"]');
+    if (!link || SELF_TRACKED_LINKS.includes(link.id)) return;
+
+    const scheme = Object.keys(CONTACT_EVENTS).find((k) => link.getAttribute('href').startsWith(k));
+    if (!scheme) return;
+    const { ga, meta } = CONTACT_EVENTS[scheme];
+
+    const where = link.closest('.contact-actions') ? 'contact_cards'
+      : link.closest('footer, address, .nap') ? 'footer'
+      : 'other';
+
+    if (GA4_MEASUREMENT_ID && typeof gtag === 'function') gtag('event', ga, { where });
+    if (META_PIXEL_ID && typeof fbq === 'function') fbq('trackCustom', meta, { where });
+  });
+}
+
 // Funnel visibility: fires once per visit, the first time the booking form
 // scrolls into view, so we can see clicks -> landing -> reached form -> lead.
 function initBookingFormReachedTracking() {
@@ -143,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initStickyMobileCta();
   initBookingForm();
   initBookingFormReachedTracking();
+  initContactTapTracking();
   initEnrollmentCountdown();
 });
 
