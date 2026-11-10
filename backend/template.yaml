@@ -10,7 +10,7 @@ Parameters:
   AllowedOrigin:
     Type: String
     Description: "The site origin allowed to call POST /leads"
-    Default: "https://pianolessonsmi.com"
+    Default: "https://porchnotemusic.com"
 
 Globals:
   Function:
@@ -36,6 +36,10 @@ Resources:
       CorsConfiguration:
         AllowOrigins:
           - !Ref AllowedOrigin
+          - "https://www.porchnotemusic.com"
+          # Kept while pianolessonsmi.com still 301s here, so a cached copy of
+          # the old page can still submit instead of silently failing.
+          - "https://pianolessonsmi.com"
           - "https://www.pianolessonsmi.com"
           - "http://localhost:8123"
         AllowMethods:
