@@ -1,4 +1,4 @@
-/* Baraiac Piano Lessons — interactions */
+/* Porchnote Music — interactions */
 
 // Deployed backend (see backend/README.md) - automatically emails/texts
 // Aiden on submission. If this API is ever unreachable, the form falls back
