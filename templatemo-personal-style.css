@@ -96,7 +96,10 @@ a { color: var(--color-accent); }
 }
 
 /* ===== Navigation ===== */
-nav {
+/* Scoped to the header. A bare `nav` selector also matched the footer's
+   <nav class="footer-links">, pinning it to the top at z-index 1000 where it
+   covered the logo and the whole header menu. */
+#navbar {
   position: fixed;
   top: var(--announce-height);
   width: 100%;
@@ -109,7 +112,7 @@ nav {
   transition: box-shadow 0.3s ease, background 0.3s ease;
 }
 
-nav.scrolled {
+#navbar.scrolled {
   background: rgba(255, 255, 255, 0.95);
   box-shadow: var(--shadow-sm);
 }
