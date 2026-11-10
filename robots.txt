@@ -3,4 +3,4 @@ Allow: /
 # Internal teacher worksheet, not a landing page
 Disallow: /first-song-note.html
 
-Sitemap: https://www.pianolessonsmi.com/sitemap.xml
+Sitemap: https://porchnotemusic.com/sitemap.xml
