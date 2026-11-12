@@ -971,6 +971,14 @@ a { color: var(--color-accent); }
   gap: 1.5rem;
 }
 
+/* With an odd number of teachers the last card would sit alone against the
+   left edge with a hole beside it. Centre it instead. */
+.teachers-grid > .teacher-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  width: calc(50% - 0.75rem);
+  margin-inline: auto;
+}
+
 .teacher-card {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
