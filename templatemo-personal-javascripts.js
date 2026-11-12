@@ -76,6 +76,42 @@ function initContactTapTracking() {
   });
 }
 
+// Where the visitor came from, remembered so it survives the gap between
+// landing on an ad and actually submitting the form. First touch wins within
+// the window: someone who arrives from a Facebook ad, leaves, and returns
+// directly a day later should still be credited to Facebook.
+const ATTRIBUTION_KEY = 'pn_source';
+const ATTRIBUTION_DAYS = 30;
+
+function captureTrafficSource() {
+  let stored = null;
+  try { stored = JSON.parse(localStorage.getItem(ATTRIBUTION_KEY) || 'null'); } catch { stored = null; }
+  const fresh = stored && (Date.now() - stored.at) < ATTRIBUTION_DAYS * 864e5;
+
+  const q = new URLSearchParams(location.search);
+  const utmSource = q.get('utm_source');
+  // Meta and Google stamp their own click ids even when utm tags are missing.
+  const paidHint = q.has('fbclid') ? 'facebook' : q.has('gclid') ? 'google' : null;
+
+  let source = null;
+  if (utmSource) source = `${utmSource} / ${q.get('utm_medium') || 'unknown'}`;
+  else if (paidHint) source = `${paidHint} / paid (untagged)`;
+  else if (document.referrer) {
+    try {
+      const h = new URL(document.referrer).hostname.replace(/^www\./, '');
+      if (h && h !== location.hostname) source = `${h} / referral`;
+    } catch { /* malformed referrer - ignore */ }
+  }
+
+  // A new campaign click overwrites an old stored value; plain return visits
+  // must not overwrite a real source with "direct".
+  if (source && (!fresh || utmSource || paidHint)) {
+    try { localStorage.setItem(ATTRIBUTION_KEY, JSON.stringify({ source, at: Date.now() })); } catch { /* private mode */ }
+    return source;
+  }
+  return fresh ? stored.source : (source || 'direct');
+}
+
 // Funnel visibility: fires once per visit, the first time the booking form
 // scrolls into view, so we can see clicks -> landing -> reached form -> lead.
 function initBookingFormReachedTracking() {
@@ -369,6 +405,7 @@ function initBookingForm() {
           time: timeLabel,
           notes: data.notes || '',
           priceAcknowledged: data.priceAck === 'yes' ? 'yes' : 'no',
+          source: captureTrafficSource(),
         }),
       });
       return res.ok;

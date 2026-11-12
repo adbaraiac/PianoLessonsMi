@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- The number stays visible for local-SEO NAP matching, but should not
+       become a tap-to-call link: enquiries go by text or email. -->
+  <meta name="format-detection" content="telephone=no" />
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17704442079"></script>
@@ -56,7 +59,7 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon-v2.png" />
 
   <link rel="preload" href="/images/hero-recital.webp" as="image" type="image/webp" />
-  <link href="/templatemo-personal-style.css?v=17" rel="stylesheet" type="text/css" />
+  <link href="/templatemo-personal-style.css?v=18" rel="stylesheet" type="text/css" />
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #faf9f7; color: #2c2c2e; }
     .btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0.85rem 1.5rem; background: #3d5c50; color: #fff; text-decoration: none; border-radius: 999px; font-weight: 600; }
@@ -581,10 +584,6 @@
         </div>
 
         <div class="contact-actions fade-in" role="group" aria-label="Contact options">
-          <a class="contact-card" href="tel:+12486071916">
-            <span class="contact-label">Call</span>
-            <span class="contact-value">(248) 607-1916</span>
-          </a>
           <a class="contact-card contact-card-primary" href="sms:+12486071916">
             <span class="contact-label">Text us</span>
             <span class="contact-value">(248) 607-1916</span>
@@ -596,7 +595,7 @@
         </div>
         <address class="nap fade-in">
           <strong>Porchnote Music</strong> · Troy, MI<br />
-          <a href="tel:+12486071916">(248) 607-1916</a>
+          <span class="nap-phone">(248) 607-1916</span>
         </address>
       </div>
     </section>
@@ -649,6 +648,6 @@
   }
   </script>
 
-  <script src="/templatemo-personal-javascripts.js?v=22" defer></script>
+  <script src="/templatemo-personal-javascripts.js?v=23" defer></script>
 </body>
 </html>

@@ -15,11 +15,12 @@ const REQUIRED_FIELDS = ['parentName', 'parentPhone', 'childAge', 'address', 'da
 // specific slot - older cached copies still send them.
 const OPTIONAL_FIELDS = [
   'parentEmail', 'childName', 'favoriteSong', 'area', 'time', 'notes', 'priceAcknowledged',
+  'source',
 ];
 const MAX_LENGTHS = {
   parentName: 200, parentPhone: 40, parentEmail: 200, childName: 200, childAge: 10,
   favoriteSong: 300, area: 100, address: 300, day: 120, time: 120, notes: 1000,
-  priceAcknowledged: 10,
+  priceAcknowledged: 10, source: 200,
 };
 
 function clean(value, field) {
@@ -82,6 +83,7 @@ exports.handler = async (event) => {
     lead.favoriteSong ? `Favorite song: ${lead.favoriteSong}` : null,
     lead.priceAcknowledged === 'yes' ? 'Pricing: acknowledged before booking' : null,
     lead.notes ? `Notes: ${lead.notes}` : null,
+    lead.source ? `Came from: ${lead.source}` : null,
     `Log it: ${link}`,
   ].filter(Boolean).join('\n');
 
