@@ -1489,6 +1489,56 @@ a { color: var(--color-accent); }
   content: " · ";
 }
 
+/* Times nested under the day they belong to */
+.day-row { display: grid; gap: 0.4rem; }
+
+.day-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0 0 0.35rem 2.1rem;   /* indent so they read as children of the day */
+}
+
+.time-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 40px;
+  padding: 0.3rem 0.75rem;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.time-chip:hover { border-color: var(--color-accent-light); }
+
+.time-chip input {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.time-chip:has(input:checked) {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+}
+
+.time-chip:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* the time-of-day hint is noise once it sits inside a chip */
+.time-chip .day-choice-note { display: none; }
+
+@media (max-width: 420px) {
+  .day-times { padding-left: 1.1rem; }
+  .time-chip { font-size: 0.84rem; padding: 0.3rem 0.6rem; }
+}
+
 /* ===== Pricing acknowledgement ===== */
 .price-ack {
   background: var(--color-gold-soft);

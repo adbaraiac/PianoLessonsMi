@@ -310,8 +310,6 @@ function initBookingForm() {
 
   const dayChoices = document.getElementById('dayChoices');
   const dayNote = document.getElementById('dayNote');
-  const timeGroup = document.getElementById('timeGroup');
-  const timeChoices = document.getElementById('timeChoices');
 
   const boxesNamed = (name) => Array.from(form.querySelectorAll(`input[name="${name}"]`));
   const pickedIn = (name) => boxesNamed(name).filter((b) => b.checked).map((b) => b.value);
@@ -324,60 +322,85 @@ function initBookingForm() {
     boxesNamed(name).forEach((b) => { b.required = isRequired && !anyChecked; });
   }
 
+  // Times hang off the day they belong to. Asked as two independent lists,
+  // "Monday, Tuesday" plus "after school, early evening" has four possible
+  // meanings and the form cannot tell which one the parent intended.
+  function timeFieldFor(day) { return `time:${day}`; }
+
   function syncChoices() {
     const days = pickedIn('day');
     const optedOut = days.includes(NO_DAY_VALUE);
-
-    // Asking which times suit is pointless when none of our days work at all.
-    timeGroup.hidden = optedOut;
     setGroupRequired('day', true);
-    setGroupRequired('time', !optedOut && days.length > 0);
 
-    if (!days.length) dayNote.textContent = '';
-    else if (optedOut) dayNote.textContent = "No problem - tell us below what would suit and we'll see what we can do.";
-    else dayNote.textContent = `✓ ${joinWithOr(days)}`;
-  }
-
-  function addChoice(container, name, value, label, note, exclusiveValue) {
-    const id = choiceInputId(name, value);
-    const wrap = document.createElement('label');
-    wrap.className = 'day-choice';
-    wrap.setAttribute('for', id);
-
-    const input = document.createElement('input');
-    input.type = 'checkbox';
-    input.name = name;
-    input.id = id;
-    input.value = value;
-
-    input.addEventListener('change', () => {
-      // An opt-out contradicts picking real options, so the two are mutually
-      // exclusive rather than silently sending both.
-      if (input.checked && exclusiveValue) {
-        const boxes = boxesNamed(name);
-        if (value === exclusiveValue) boxes.forEach((b) => { if (b !== input) b.checked = false; });
-        else boxes.forEach((b) => { if (b.value === exclusiveValue) b.checked = false; });
-      }
-      syncChoices();
+    BOOKING_DAYS.forEach((d) => {
+      const chosen = days.includes(d.value);
+      const panel = document.getElementById(`times-${choiceInputId('day', d.value)}`);
+      if (panel) panel.hidden = !chosen;
+      // Only demand times for days they actually picked.
+      setGroupRequired(timeFieldFor(d.value), chosen && !optedOut);
     });
 
+    if (!days.length) { dayNote.textContent = ''; return; }
+    if (optedOut) { dayNote.textContent = "No problem - tell us below what would suit and we'll see what we can do."; return; }
+    const parts = BOOKING_DAYS.filter((d) => days.includes(d.value)).map((d) => {
+      const t = pickedIn(timeFieldFor(d.value));
+      return t.length ? `${d.label} ${t.join('/').toLowerCase()}` : `${d.label} (pick a time)`;
+    });
+    dayNote.textContent = `✓ ${parts.join(' · ')}`;
+  }
+
+  function makeCheckbox(name, value, labelText, note, cls) {
+    const id = choiceInputId(name, value);
+    const wrap = document.createElement('label');
+    wrap.className = cls;
+    wrap.setAttribute('for', id);
+    const input = document.createElement('input');
+    input.type = 'checkbox'; input.name = name; input.id = id; input.value = value;
     const text = document.createElement('span');
     text.className = 'day-choice-label';
-    text.textContent = label;
+    text.textContent = labelText;
     if (note) {
       const small = document.createElement('span');
       small.className = 'day-choice-note';
       small.textContent = note;
       text.appendChild(small);
     }
-
     wrap.append(input, text);
-    container.appendChild(wrap);
+    return { wrap, input };
   }
 
-  BOOKING_DAYS.forEach((d) => addChoice(dayChoices, 'day', d.value, d.label, d.note, NO_DAY_VALUE));
-  addChoice(dayChoices, 'day', NO_DAY_VALUE, 'None of these', 'contact me about alternatives', NO_DAY_VALUE);
-  BOOKING_TIMES.forEach((t) => addChoice(timeChoices, 'time', t.value, t.label, t.note));
+  function addDayRow(day) {
+    const row = document.createElement('div');
+    row.className = 'day-row';
+    const { wrap, input } = makeCheckbox('day', day.value, day.label, day.note, 'day-choice');
+    input.addEventListener('change', () => {
+      // Picking a real day contradicts "none of these", so clear the opt-out.
+      if (input.checked) boxesNamed('day').forEach((b) => { if (b.value === NO_DAY_VALUE) b.checked = false; });
+      if (!input.checked) boxesNamed(timeFieldFor(day.value)).forEach((b) => { b.checked = false; });
+      syncChoices();
+    });
+    row.appendChild(wrap);
+
+    const times = document.createElement('div');
+    times.className = 'day-times';
+    times.id = `times-${choiceInputId('day', day.value)}`;
+    times.hidden = true;
+    BOOKING_TIMES.forEach((t) => {
+      const c = makeCheckbox(timeFieldFor(day.value), t.value, t.label, t.note, 'time-chip');
+      c.input.addEventListener('change', syncChoices);
+      times.appendChild(c.wrap);
+    });
+    row.appendChild(times);
+    dayChoices.appendChild(row);
+  }
+
+  BOOKING_DAYS.forEach(addDayRow);
+  const none = makeCheckbox('day', NO_DAY_VALUE, 'None of these', 'contact me about alternatives', 'day-choice');
+  none.input.addEventListener('change', () => {
+    if (none.input.checked) boxesNamed('day').forEach((b) => { if (b !== none.input) b.checked = false; });
+    syncChoices();
+  });
+  dayChoices.appendChild(none.wrap);
   syncChoices();
 
   const confirmPanel = document.getElementById('bookingConfirm');
@@ -438,9 +461,16 @@ function initBookingForm() {
     const data = Object.fromEntries(fd.entries());
     // getAll, not get - a parent can tick more than one day.
     const pickedDays = fd.getAll('day');
-    const pickedTimes = fd.getAll('time');
+    // "Monday: after school; Tuesday: early evening" - each day carries its own
+    // times, so there is no ambiguity about which time belongs to which day.
+    const pairs = pickedDays
+      .filter((d) => d !== NO_DAY_VALUE)
+      .map((d) => {
+        const t = fd.getAll(`time:${d}`);
+        return t.length ? `${d}: ${t.join(', ')}` : d;
+      });
     const dayLabel = pickedDays.join(', ');
-    const timeLabel = pickedTimes.join(', ');
+    const timeLabel = pairs.join('; ');
 
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
@@ -452,7 +482,7 @@ function initBookingForm() {
       fireConversionOnce();
       sentSlot.textContent = pickedDays.includes(NO_DAY_VALUE)
         ? "We'll text you about times outside our usual days."
-        : `${joinWithOr(pickedDays)}${pickedTimes.length ? ' — ' + joinWithOr(pickedTimes).toLowerCase() : ''}`;
+        : pairs.join('  ·  ');
       form.hidden = true;
       sentPanel.hidden = false;
       sentPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
