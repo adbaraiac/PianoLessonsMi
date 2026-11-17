@@ -94,7 +94,11 @@ function captureTrafficSource() {
   const paidHint = q.has('fbclid') ? 'facebook' : q.has('gclid') ? 'google' : null;
 
   let source = null;
-  if (utmSource) source = `${utmSource} / ${q.get('utm_medium') || 'unknown'}`;
+  if (utmSource) {
+    const medium = q.get('utm_medium') || 'unknown';
+    const campaign = q.get('utm_campaign');
+    source = campaign ? `${utmSource} / ${medium} / ${campaign}` : `${utmSource} / ${medium}`;
+  }
   else if (paidHint) source = `${paidHint} / paid (untagged)`;
   else if (document.referrer) {
     try {
@@ -207,8 +211,36 @@ const fadeObserver = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
+// A visitor who arrives with a fragment - an ad sitelink pointing at #pricing,
+// say - is scrolled there by the browser before images and fonts have settled.
+// `scroll-behavior: smooth` on <html> turns that jump into an animation, and the
+// layout shifting underneath it cancels the animation partway: the visitor is
+// dropped at the top of the page and the deep link is silently ignored. Place
+// them ourselves, instantly, and again once everything has finished loading.
+function initLandingFragment() {
+  const hash = window.location.hash;
+  if (!hash || hash === '#') return;
+  let target = null;
+  try { target = document.querySelector(hash); } catch { return; }
+  if (!target) return;
+
+  function place() {
+    const navOffset = document.getElementById('navbar')?.offsetHeight || 72;
+    const announceOffset = document.querySelector('.announcement-bar')?.offsetHeight || 0;
+    const y = target.getBoundingClientRect().top + window.pageYOffset - navOffset - announceOffset;
+    window.scrollTo({ top: Math.max(y, 0), behavior: 'instant' });
+  }
+  place();
+  window.addEventListener('load', () => { place(); setTimeout(place, 150); }, { once: true });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.fade-in, .stagger-children').forEach((el) => fadeObserver.observe(el));
+  // On arrival, not at submit: first-touch attribution only works if the source
+  // is banked while the ad's utm/gclid parameters are still in the URL. A parent
+  // who clicks the ad today and books on Thursday otherwise records as "direct".
+  captureTrafficSource();
+  initLandingFragment();
   initTestimonialCarousel();
   initStickyMobileCta();
   initBookingForm();
