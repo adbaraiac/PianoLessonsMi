@@ -545,6 +545,35 @@ a { color: var(--color-accent); }
   text-align: center;
 }
 
+/* The recital group shot, moved out of the hero so the hero can show what we
+   actually sell - a lesson in your own living room. Group credibility belongs
+   here instead, backing up the reviews right before the call to action. */
+.recital-photo {
+  max-width: 34rem;
+  margin: 2.75rem auto 0;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 0.75rem 1rem;
+  box-shadow: var(--shadow-lg);
+  transform: rotate(-1.25deg);
+}
+
+.recital-photo img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius-md);
+}
+
+.recital-photo figcaption {
+  margin-top: 0.65rem;
+  padding: 0 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
 /* ===== Proof (trust stats) ===== */
 .proof-stats {
   list-style: none;
