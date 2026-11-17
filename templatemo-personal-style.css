@@ -1383,6 +1383,40 @@ a { color: var(--color-accent); }
   margin-top: 0.85rem;
 }
 
+/* Phone and email are a choice, not two requirements. The explanation sits
+   above the pair rather than under it - a note printed after both fields is
+   read after the parent has already decided they must fill in both - and the
+   "or" rule between them carries the point visually. */
+.contact-choice {
+  border: 0;
+  padding: 0;
+  margin: 0 0 1.75rem;
+}
+
+.contact-choice .field-hint {
+  margin-bottom: 0.9rem;
+}
+
+.contact-or {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin: 0.15rem 0 0.4rem;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.contact-or::before,
+.contact-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
 /* ===== Day + time slot picker ===== */
 .form-block {
   position: relative;
@@ -2015,7 +2049,11 @@ body.mobile-cta-active {
 
   .trust-pills { flex-direction: column; align-items: flex-start; }
 
+  /* Stacked, the flex main axis is vertical, so .contact-card's 14rem basis
+     would size its HEIGHT and leave each card 224px tall around one line of
+     text. Let them be their natural height here. */
   .contact-actions { flex-direction: column; }
+  .contact-card { flex: 0 0 auto; }
 
   .form-row { grid-template-columns: 1fr; gap: 0; }
 
