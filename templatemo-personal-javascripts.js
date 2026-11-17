@@ -394,14 +394,38 @@ function initBookingForm() {
     dayChoices.appendChild(row);
   }
 
-  BOOKING_DAYS.forEach(addDayRow);
-  const none = makeCheckbox('day', NO_DAY_VALUE, 'None of these', 'contact me about alternatives', 'day-choice');
-  none.input.addEventListener('change', () => {
-    if (none.input.checked) boxesNamed('day').forEach((b) => { if (b !== none.input) b.checked = false; });
+  // The form no longer asks for days - scheduling is settled over text, which
+  // is what the parent is signing up for anyway. The picker is left intact so
+  // it can be restored by putting #dayChoices back in the markup.
+  if (dayChoices && dayNote) {
+    BOOKING_DAYS.forEach(addDayRow);
+    const none = makeCheckbox('day', NO_DAY_VALUE, 'None of these', 'contact me about alternatives', 'day-choice');
+    none.input.addEventListener('change', () => {
+      if (none.input.checked) boxesNamed('day').forEach((b) => { if (b !== none.input) b.checked = false; });
+      syncChoices();
+    });
+    dayChoices.appendChild(none.wrap);
     syncChoices();
-  });
-  dayChoices.appendChild(none.wrap);
-  syncChoices();
+  }
+
+  // Phone or email, parent's choice - but we need one of them. There is no
+  // native "at least one of these two" rule, so each field stays required only
+  // while the other is empty, and the message says what is actually wanted.
+  const phoneInput = form.querySelector('#parentPhone');
+  const emailInput = form.querySelector('#parentEmail');
+  const CONTACT_PROMPT = 'Add a mobile number or an email so we can reply.';
+  function syncContactRequired() {
+    const hasOne = [phoneInput, emailInput].some((el) => el && el.value.trim() !== '');
+    [phoneInput, emailInput].forEach((el) => {
+      if (!el) return;
+      el.required = !hasOne;
+      el.setCustomValidity(hasOne ? '' : CONTACT_PROMPT);
+    });
+    // An email that is present but malformed must still report its own error.
+    if (hasOne && emailInput && emailInput.value.trim() !== '') emailInput.setCustomValidity('');
+  }
+  [phoneInput, emailInput].forEach((el) => el && el.addEventListener('input', syncContactRequired));
+  syncContactRequired();
 
   const confirmPanel = document.getElementById('bookingConfirm');
   const confirmName = document.getElementById('confirmName');
@@ -420,14 +444,18 @@ function initBookingForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           parentName: data.parentName,
-          parentPhone: data.parentPhone,
-          childAge: data.childAge,
+          parentPhone: data.parentPhone || '',
+          parentEmail: data.parentEmail || '',
+          city: data.city || '',
+          childAge: data.childAge || '',
           favoriteSong: data.favoriteSong || '',
           address: data.address || '',
           day: dayLabel,
           time: timeLabel,
           notes: data.notes || '',
-          priceAcknowledged: data.priceAck === 'yes' ? 'yes' : 'no',
+          // Empty, not 'no', when the form does not ask - otherwise every lead
+          // looks like a parent who declined to acknowledge the pricing.
+          priceAcknowledged: data.priceAck === 'yes' ? 'yes' : '',
           source: captureTrafficSource(),
         }),
       });
@@ -480,9 +508,9 @@ function initBookingForm() {
     if (sentAutomatically) {
       // Confirmed received - this is a real inquiry, so count it.
       fireConversionOnce();
-      sentSlot.textContent = pickedDays.includes(NO_DAY_VALUE)
-        ? "We'll text you about times outside our usual days."
-        : pairs.join('  ·  ');
+      sentSlot.textContent = pairs.length
+        ? pairs.join('  ·  ')
+        : "We'll text you shortly to find a time that works.";
       form.hidden = true;
       sentPanel.hidden = false;
       sentPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -495,18 +523,20 @@ function initBookingForm() {
     fireSubmitFailed();
     const lines = [
       `Hi! I'd like to book a free trial piano lesson.`,
-      `Parent: ${data.parentName} (${data.parentPhone})`,
-      `Child age: ${data.childAge}`,
+      `Parent: ${data.parentName}${data.parentPhone ? ` (${data.parentPhone})` : ''}`,
+      data.parentEmail ? `Email: ${data.parentEmail}` : null,
+      data.city ? `City: ${data.city}` : null,
+      data.childAge ? `Child age: ${data.childAge}` : null,
       data.favoriteSong ? `Favorite song: ${data.favoriteSong}` : null,
       data.address ? `Address: ${data.address}` : null,
-      `Days that work: ${dayLabel}`,
+      dayLabel ? `Days that work: ${dayLabel}` : null,
       timeLabel ? `Times that work: ${timeLabel}` : null,
       data.notes ? `Notes: ${data.notes}` : null,
     ].filter(Boolean);
 
     const message = lines.join('\n');
 
-    confirmName.textContent = data.childName || 'there';
+    confirmName.textContent = data.parentName || 'there';
     confirmSummary.innerHTML = lines.map((l) => `<p>${l.replace(/</g, '&lt;')}</p>`).join('');
     confirmSmsLink.href = `sms:${BOOKING_PHONE}?body=${encodeURIComponent(message)}`;
     confirmEmailLink.href = `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent('New free trial lesson request')}&body=${encodeURIComponent(message)}`;

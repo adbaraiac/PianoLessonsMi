@@ -517,54 +517,29 @@
         <form id="bookingForm" class="booking-form fade-in" novalidate>
           <div class="form-row">
             <div class="form-field">
-              <label for="parentName">Parent&rsquo;s name</label>
-              <input type="text" id="parentName" name="parentName" autocomplete="name" required />
+              <label for="parentName">Your first name</label>
+              <input type="text" id="parentName" name="parentName" autocomplete="given-name" required />
             </div>
             <div class="form-field">
-              <label for="parentPhone">Phone number</label>
-              <input type="tel" id="parentPhone" name="parentPhone" autocomplete="tel" required />
+              <label for="city">Your city</label>
+              <input type="text" id="city" name="city" autocomplete="address-level2" placeholder="Troy, Rochester Hills, Birmingham..." required />
             </div>
           </div>
 
           <div class="form-field">
-            <label for="childAge">Child&rsquo;s age</label>
-            <input type="number" id="childAge" name="childAge" min="3" max="99" inputmode="numeric" required />
+            <label for="parentPhone">Mobile number <span class="form-optional">(we&rsquo;ll text you &mdash; we never call)</span></label>
+            <input type="tel" id="parentPhone" name="parentPhone" autocomplete="tel" />
           </div>
 
           <div class="form-field">
-            <label for="address">Home address <span class="form-optional">(so your teacher knows where to come)</span></label>
-            <input type="text" id="address" name="address" autocomplete="street-address" placeholder="123 Maple Ln, Bloomfield Hills, MI 48301" required />
+            <label for="parentEmail">Email <span class="form-optional">(if you&rsquo;d rather not share a number)</span></label>
+            <input type="email" id="parentEmail" name="parentEmail" autocomplete="email" />
           </div>
 
-          <div class="form-field">
-            <label for="favoriteSong">Child&rsquo;s favorite song <span class="form-optional">(optional &mdash; so we can prep it for lesson one)</span></label>
-            <input type="text" id="favoriteSong" name="favoriteSong" placeholder="e.g. Twinkle Twinkle, a movie theme, a pop song..." />
-          </div>
-
-          <div class="form-block">
-            <p class="field-label">When could lessons work?</p>
-            <p class="field-hint">Pick a day, then the times that suit it. Add as many days as you like.</p>
-            <div class="day-choices" id="dayChoices"></div>
-            <p class="form-note" id="dayNote" aria-live="polite"></p>
-          </div>
-          </div>
-
-          <div class="form-field">
-            <label for="notes">Anything else we should know? <span class="form-optional">(optional)</span></label>
-            <textarea id="notes" name="notes" rows="2" placeholder="What motivates them, how they learn best, a sibling who&rsquo;d also like lessons..."></textarea>
-          </div>
-
-          <div class="price-ack">
-            <p class="price-ack-head">Before you book&mdash;here&rsquo;s the part most places make you ask for</p>
-            <p>Your kit and first lesson are <strong>free</strong>, and you decide nothing until after you&rsquo;ve met your teacher. If you&rsquo;d like to keep going, weekly lessons are <strong>$349/month</strong>&mdash;or <strong>$579/month</strong> for hour-long lessons. Books, materials, recital, and travel to your door are all included.</p>
-            <label class="price-ack-check">
-              <input type="checkbox" id="priceAck" name="priceAck" value="yes" required />
-              <span>I&rsquo;ve seen the pricing and I&rsquo;m comfortable with it if my child and the teacher are a good fit.</span>
-            </label>
-          </div>
+          <p class="form-note" id="contactNote">Either one is fine&mdash;we just need one way to reach you.</p>
 
           <button type="submit" class="btn btn-primary btn-lg btn-block">Request My FREE Trial Lesson</button>
-          <p class="form-note form-note-center">No credit card required. We&rsquo;ll text you to confirm your lesson time.</p>
+          <p class="form-note form-note-center">No credit card required, and nothing to decide until after you&rsquo;ve met your teacher.</p>
         </form>
 
         <p class="form-alt fade-in">Not ready to book yet? <a id="askQuestionLink" href="sms:+12486071916?body=Hi%20Aiden!%20I%20have%20a%20question%20about%20piano%20lessons%3A%20">Text Aiden a question</a>—no pressure, and you'll hear back from a real person.</p>
@@ -651,6 +626,6 @@
   }
   </script>
 
-  <script src="/templatemo-personal-javascripts.js?v=24" defer></script>
+  <script src="/templatemo-personal-javascripts.js?v=25" defer></script>
 </body>
 </html>
