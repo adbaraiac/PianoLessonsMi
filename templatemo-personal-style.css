@@ -1733,13 +1733,20 @@ a { color: var(--color-accent); }
 .section-contact { background: var(--color-bg-warm); }
 
 .contact-actions {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* Centred flex, not a fixed column count. This was repeat(3, 1fr) when there
+     was a third "call us" card; removing that card left an empty third column
+     that shunted the remaining two off-centre. Flex keeps them centred however
+     many cards there are. */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem;
   margin-bottom: 2rem;
 }
 
 .contact-card {
+  flex: 1 1 14rem;
+  max-width: 22rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1979,7 +1986,7 @@ body.mobile-cta-active {
 
   .trust-pills { flex-direction: column; align-items: flex-start; }
 
-  .contact-actions { grid-template-columns: 1fr; }
+  .contact-actions { flex-direction: column; }
 
   .form-row { grid-template-columns: 1fr; gap: 0; }
 
