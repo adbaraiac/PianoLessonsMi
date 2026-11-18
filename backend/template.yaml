@@ -21,6 +21,8 @@ Globals:
       Variables:
         LEADS_TABLE: !Ref PianoLeadsTable
         SLOTS_TABLE: !Ref TeacherSlotsTable
+        APPLICATIONS_TABLE: !Ref TeacherApplicationsTable
+        APPLICATION_VIDEOS_BUCKET: !Ref ApplicationVideosBucket
         AIDEN_PHONE: !Ref AidenPhoneNumber
         NOTIFICATION_TOPIC_ARN: !Ref LeadNotificationsTopic
 
@@ -48,6 +50,49 @@ Resources:
           - OPTIONS
         AllowHeaders:
           - Content-Type
+
+  TeacherApplicationsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+
+  ApplicationVideosBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # Audition videos of real people. Nothing here is ever public; the review
+      # page hands out short-lived signed URLs instead.
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          # Applications go stale, and so does our reason to hold someone's
+          # video. Incomplete multipart uploads would otherwise bill forever.
+          - Id: ExpireOldApplicationVideos
+            Status: Enabled
+            ExpirationInDays: 365
+          - Id: AbortIncompleteUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods: [POST]
+            AllowedOrigins:
+              - !Ref AllowedOrigin
+              - "https://www.porchnotemusic.com"
+              - "http://localhost:8123"
+            AllowedHeaders: ["*"]
+            ExposedHeaders: [ETag]
+            MaxAge: 3000
 
   PianoLeadsTable:
     Type: AWS::Serverless::SimpleTable
@@ -111,6 +156,68 @@ Resources:
           Properties:
             ApiId: !Ref PianoApi
             Path: /leads/{id}
+            Method: POST
+
+  ApplicationUploadUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: applicationUploadUrl.handler
+      Policies:
+        - S3WritePolicy:
+            BucketName: !Ref ApplicationVideosBucket
+      Events:
+        GetUploadUrl:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PianoApi
+            Path: /applications/upload-url
+            Method: GET
+
+  SubmitApplicationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: submitApplication.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TeacherApplicationsTable
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt LeadNotificationsTopic.TopicName
+        - Statement:
+            - Effect: Allow
+              Action: sns:Publish
+              Resource: "*"
+      Events:
+        SubmitApplication:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PianoApi
+            Path: /applications
+            Method: POST
+
+  ApplicationStatusPageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: applicationStatusPage.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TeacherApplicationsTable
+        - S3ReadPolicy:
+            BucketName: !Ref ApplicationVideosBucket
+      Events:
+        GetApplication:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PianoApi
+            Path: /applications/{id}
+            Method: GET
+        UpdateApplication:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PianoApi
+            Path: /applications/{id}
             Method: POST
 
 Outputs:

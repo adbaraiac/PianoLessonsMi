@@ -27,4 +27,29 @@ function isBookedStatus(statusKey) {
   return match ? match.booked : false;
 }
 
-module.exports = { TEACHERS, STATUS_OPTIONS, isBookedStatus };
+// Deliberately wider than the five cities we teach in today. A strong
+// applicant in a city with no students yet is still worth keeping on file -
+// they become the reason we can say yes the first time a parent there asks.
+const SERVICE_AREAS = [
+  'Troy', 'Rochester Hills', 'Birmingham', 'Bloomfield Hills', 'Royal Oak',
+  'Farmington Hills', 'West Bloomfield', 'Novi', 'Auburn Hills', 'Clawson',
+  'Berkley', 'Ferndale', 'Madison Heights', 'Southfield', 'Sterling Heights',
+  'Shelby Township', 'Utica', 'Warren',
+];
+
+// Where an application sits in the pipeline. "hold" exists because supply and
+// demand arrive in the wrong order: a good teacher in a city we have no
+// students in yet is a yes we are not ready to act on, not a no.
+const APPLICATION_STATUS_OPTIONS = [
+  { key: 'new', label: 'New - not reviewed yet' },
+  { key: 'reviewing', label: 'Watching their video' },
+  { key: 'interview', label: 'Interview scheduled' },
+  { key: 'background_check', label: 'Background check in progress' },
+  { key: 'hired', label: 'Hired - teaching for us' },
+  { key: 'hold', label: 'Good, but no students in their area yet' },
+  { key: 'declined', label: 'Not a fit' },
+];
+
+module.exports = {
+  TEACHERS, STATUS_OPTIONS, isBookedStatus, SERVICE_AREAS, APPLICATION_STATUS_OPTIONS,
+};
