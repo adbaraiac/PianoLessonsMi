@@ -1,0 +1,229 @@
+/* First Notes page only. The main stylesheet supplies palette, type, buttons
+   and footer; this adds the few pieces this page needs. */
+
+/* No announcement bar on this page, so the shared nav sits at the very top. */
+#navbar {
+  top: 0;
+}
+
+.nowrap { white-space: nowrap; }
+
+.fn-hero {
+  background: var(--color-accent-soft);
+  padding: calc(var(--nav-height) + 3rem) 0 3rem;
+}
+
+.fn-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 5vw, 3.5rem);
+  align-items: center;
+}
+
+.fn-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-bottom: 0.85rem;
+}
+
+.fn-hero h1 {
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  line-height: 1.12;
+  margin-bottom: 1rem;
+}
+
+.fn-lead {
+  font-size: clamp(1.02rem, 2.2vw, 1.15rem);
+  line-height: 1.65;
+  color: var(--color-text);
+  margin-bottom: 1.5rem;
+}
+
+.fn-hero-note {
+  margin-top: 1rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  max-width: 32rem;
+}
+
+.fn-hero-shot { margin: 0; }
+.fn-hero-shot img,
+.fn-proof-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+.fn-hero-shot figcaption,
+.fn-proof-photo figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+.fn-sub {
+  color: var(--color-text-muted);
+  max-width: 40rem;
+  margin: 0.5rem auto 0;
+  line-height: 1.6;
+}
+
+.fn-ready {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+.fn-ready > div {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+}
+.fn-ready h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
+
+.fn-checks { list-style: none; padding: 0; margin: 0; }
+.fn-checks li {
+  position: relative;
+  padding-left: 1.6rem;
+  margin: 0.6rem 0;
+  line-height: 1.55;
+}
+.fn-checks li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.fn-journey {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.fn-journey li {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.fn-journey li span:last-child { color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.5; }
+.fn-step-num {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-gold-soft);
+  color: var(--color-accent);
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+.fn-journey-finale { background: var(--color-accent) !important; color: #fff; }
+.fn-journey-finale span:last-child { color: rgba(255, 255, 255, 0.85) !important; }
+
+.fn-help {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.fn-help-card {
+  background: var(--color-gold-soft);
+  border-radius: var(--radius-md);
+  padding: 1.35rem;
+}
+.fn-help-card span { font-size: 1.75rem; }
+.fn-help-card h3 { font-size: 1.1rem; margin: 0.5rem 0 0.35rem; }
+.fn-help-card p { color: var(--color-text-muted); line-height: 1.55; margin: 0; }
+.fn-honest {
+  margin: 1.5rem auto 0;
+  max-width: 44rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.fn-proof {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: center;
+}
+.fn-proof figure { margin: 0; }
+.fn-proof-quote {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+.fn-proof-quote blockquote { margin: 0.5rem 0 0.75rem; font-size: 1.05rem; line-height: 1.6; }
+.fn-proof-quote figcaption span { color: var(--color-text-muted); }
+
+.fn-offer {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.fn-included {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+.fn-included li {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.fn-included li span { color: var(--color-text-muted); font-size: 0.93rem; }
+
+.fn-price-card {
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.fn-price-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin: 0;
+}
+.fn-price { font-size: 2.4rem; font-weight: 700; color: var(--color-text); margin: 0.2rem 0; }
+.fn-price span { font-size: 1rem; font-weight: 500; color: var(--color-text-muted); }
+.fn-price-note, .fn-guarantee, .fn-legal { color: var(--color-text-muted); line-height: 1.55; margin: 0; }
+.fn-legal { font-size: 0.88rem; }
+.fn-legal a { color: var(--color-accent); }
+
+.fn-inhome { padding: 2rem 0; text-align: center; }
+.fn-inhome a { color: var(--color-accent); font-weight: 600; }
+
+@media (max-width: 900px) {
+  .fn-hero-inner, .fn-proof, .fn-offer { grid-template-columns: 1fr; }
+  .fn-journey, .fn-help { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  .fn-ready, .fn-journey, .fn-help, .fn-included { grid-template-columns: 1fr; }
+}

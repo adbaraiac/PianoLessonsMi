@@ -76,6 +76,28 @@ function initContactTapTracking() {
   });
 }
 
+// PorchNote First Notes (the self-paced online program) is a separate offer.
+// Its clicks get their own event and NEVER count as an in-home Lead or ad
+// conversion - those numbers decide ad budget. Campaign tags ride along so a
+// family who arrived from an ad is still credited when they reach First Notes.
+const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+
+function initFirstNotesLinks() {
+  const q = new URLSearchParams(location.search);
+  document.querySelectorAll('a[data-first-notes]').forEach((link) => {
+    const url = new URL(link.getAttribute('href'), location.origin);
+    UTM_KEYS.forEach((k) => {
+      if (q.has(k) && !url.searchParams.has(k)) url.searchParams.set(k, q.get(k));
+    });
+    link.setAttribute('href', url.pathname + url.search + url.hash);
+    link.addEventListener('click', () => {
+      const where = link.dataset.firstNotes;
+      if (GA4_MEASUREMENT_ID && typeof gtag === 'function') gtag('event', 'first_notes_click', { where });
+      if (META_PIXEL_ID && typeof fbq === 'function') fbq('trackCustom', 'FirstNotesClick', { where });
+    });
+  });
+}
+
 // Where the visitor came from, remembered so it survives the gap between
 // landing on an ad and actually submitting the form. First touch wins within
 // the window: someone who arrives from a Facebook ad, leaves, and returns
@@ -246,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initBookingForm();
   initBookingFormReachedTracking();
   initContactTapTracking();
+  initFirstNotesLinks();
   initEnrollmentCountdown();
 });
 

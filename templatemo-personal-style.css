@@ -2063,3 +2063,55 @@ body.mobile-cta-active {
 @media (min-width: 769px) and (max-width: 1023px) {
   .problem-solved-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ===== First Notes teaser (homepage, below the service area) =====
+   Deliberately compact and secondary: an outline button, not a primary CTA,
+   so the in-home booking buttons stay the strongest action on the page. */
+.first-notes-teaser {
+  padding-top: 0;
+}
+
+.fn-teaser {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1.25rem, 4vw, 2.5rem);
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.25rem, 4vw, 2.25rem);
+}
+
+.first-notes-teaser .nowrap { white-space: nowrap; }
+
+.fn-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-bottom: 0.5rem;
+}
+
+.fn-teaser h2 {
+  font-size: clamp(1.35rem, 3.2vw, 1.75rem);
+  line-height: 1.2;
+  margin-bottom: 0.75rem;
+}
+
+.fn-teaser-copy p:not(.fn-eyebrow) {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.fn-teaser-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 768px) {
+  .fn-teaser { grid-template-columns: 1fr; }
+}
