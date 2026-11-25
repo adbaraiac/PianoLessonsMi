@@ -59,7 +59,7 @@
   <link rel="apple-touch-icon" href="/images/apple-touch-icon-v2.png" />
 
   <link rel="preload" href="/images/hero-in-home-lesson.webp" as="image" type="image/webp" />
-  <link href="/templatemo-personal-style.css?v=23" rel="stylesheet" type="text/css" />
+  <link href="/templatemo-personal-style.css?v=24" rel="stylesheet" type="text/css" />
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #faf9f7; color: #2c2c2e; }
     .btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0.85rem 1.5rem; background: #3d5c50; color: #fff; text-decoration: none; border-radius: 999px; font-weight: 600; }
@@ -501,58 +501,50 @@
       </div>
     </section>
 
-    <section id="contact" class="section section-contact">
+    <section class="section section-contact" aria-labelledby="contactTitle">
       <div class="container container-narrow">
-        <header class="section-header fade-in">
-          <h2>The First Song Kit</h2>
-          <p class="section-lead section-lead-short">Their favorite song. Their first piano lesson. Your living room. 🎹</p>
-        </header>
+        <!-- Ads and every "Book Free Lesson" button land on #contact. Keep the
+             heading, price and form together and short enough to fit one
+             phone screen under the fixed header. -->
+        <div id="contact" class="signup-block">
+          <h2 id="contactTitle" class="signup-title">Request a Free First <span class="nobr">In-Home</span> Piano Lesson</h2>
+          <p class="signup-price">Weekly in-home lessons are <strong>$349/month</strong> if you continue. Your first lesson is free.</p>
 
-        <div class="kit-panel fade-in">
-          <p class="kit-intro">A background-checked teacher comes to your home, and by the end of the lesson your child is playing a simplified piece of a song <em>they</em> picked.</p>
-          <p class="kit-heading">Your free kit includes:</p>
-          <ul class="kit-list">
-            <li>The private lesson, in your living room</li>
-            <li>A personalized song sheet—their song, their name on it, theirs to keep</li>
-            <li>A practice chart and stickers for the fridge</li>
-            <li>A short progress note from their teacher: what your child enjoyed, what they picked up, and what you'd work on next</li>
-          </ul>
-          <p class="kit-note">No piano at home? We'll bring a keyboard for the lesson.</p>
-          <p class="kit-price">Lessons are <strong>$349/month</strong> if you continue—nothing to pay today, and no obligation after the lesson.</p>
+          <form id="bookingForm" class="booking-form" novalidate>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="parentName">Your first name</label>
+                <input type="text" id="parentName" name="parentName" autocomplete="given-name" required />
+              </div>
+              <div class="form-field">
+                <label for="city">Your city</label>
+                <input type="text" id="city" name="city" autocomplete="address-level2" placeholder="Troy, Rochester Hills, Birmingham..." required />
+              </div>
+            </div>
+
+            <fieldset class="contact-choice">
+              <legend class="field-label">How should we reach you?</legend>
+              <p class="field-hint">Mobile (we&rsquo;ll text you) or email&mdash;you only need one.</p>
+
+              <div class="contact-pair">
+                <div class="form-field">
+                  <label for="parentPhone">Mobile number</label>
+                  <input type="tel" id="parentPhone" name="parentPhone" autocomplete="tel" />
+                </div>
+
+                <p class="contact-or"><span>or</span></p>
+
+                <div class="form-field">
+                  <label for="parentEmail">Email</label>
+                  <input type="email" id="parentEmail" name="parentEmail" autocomplete="email" />
+                </div>
+              </div>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Request My FREE Trial Lesson</button>
+            <p class="form-note form-note-center">No credit card required, and nothing to decide until after you&rsquo;ve met your teacher.</p>
+          </form>
         </div>
-
-        <form id="bookingForm" class="booking-form fade-in" novalidate>
-          <div class="form-row">
-            <div class="form-field">
-              <label for="parentName">Your first name</label>
-              <input type="text" id="parentName" name="parentName" autocomplete="given-name" required />
-            </div>
-            <div class="form-field">
-              <label for="city">Your city</label>
-              <input type="text" id="city" name="city" autocomplete="address-level2" placeholder="Troy, Rochester Hills, Birmingham..." required />
-            </div>
-          </div>
-
-          <fieldset class="contact-choice">
-            <legend class="field-label">How should we reach you?</legend>
-            <p class="field-hint">Fill in whichever you prefer&mdash;you only need one of these.</p>
-
-            <div class="form-field">
-              <label for="parentPhone">Mobile number <span class="form-optional">(we&rsquo;ll text you)</span></label>
-              <input type="tel" id="parentPhone" name="parentPhone" autocomplete="tel" />
-            </div>
-
-            <p class="contact-or"><span>or</span></p>
-
-            <div class="form-field">
-              <label for="parentEmail">Email</label>
-              <input type="email" id="parentEmail" name="parentEmail" autocomplete="email" />
-            </div>
-          </fieldset>
-
-          <button type="submit" class="btn btn-primary btn-lg btn-block">Request My FREE Trial Lesson</button>
-          <p class="form-note form-note-center">No credit card required, and nothing to decide until after you&rsquo;ve met your teacher.</p>
-        </form>
 
         <p class="form-alt fade-in">Not ready to book yet? <a id="askQuestionLink" href="sms:+12486071916?body=Hi%20Aiden!%20I%20have%20a%20question%20about%20piano%20lessons%3A%20">Text Aiden a question</a>—no pressure, and you'll hear back from a real person.</p>
 
@@ -571,6 +563,25 @@
           <h3>Request sent!</h3>
           <p class="sent-slot" id="sentSlot"></p>
           <p>Thank you&mdash;<strong>you'll receive a text from Aiden shortly</strong> to confirm your lesson time and introduce your teacher.</p>
+        </div>
+
+        <div id="first-song-kit" class="first-song-kit">
+          <header class="section-header fade-in">
+            <h2>The First Song Kit</h2>
+            <p class="section-lead section-lead-short">Their favorite song. Their first piano lesson. Your living room. 🎹</p>
+          </header>
+
+          <div class="kit-panel fade-in">
+            <p class="kit-intro">A background-checked teacher comes to your home, and by the end of the lesson your child is playing a simplified piece of a song <em>they</em> picked.</p>
+            <p class="kit-heading">Your free kit includes:</p>
+            <ul class="kit-list">
+              <li>The private lesson, in your living room</li>
+              <li>A personalized song sheet—their song, their name on it, theirs to keep</li>
+              <li>A practice chart and stickers for the fridge</li>
+              <li>A short progress note from their teacher: what your child enjoyed, what they picked up, and what you'd work on next</li>
+            </ul>
+            <p class="kit-note">No piano at home? We'll bring a keyboard for the lesson.</p>
+          </div>
         </div>
 
         <div class="contact-actions fade-in" role="group" aria-label="Contact options">
@@ -639,6 +650,6 @@
   }
   </script>
 
-  <script src="/templatemo-personal-javascripts.js?v=26" defer></script>
+  <script src="/templatemo-personal-javascripts.js?v=27" defer></script>
 </body>
 </html>
