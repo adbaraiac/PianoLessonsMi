@@ -227,7 +227,9 @@ function initLandingFragment() {
   function place() {
     const navOffset = document.getElementById('navbar')?.offsetHeight || 72;
     const announceOffset = document.querySelector('.announcement-bar')?.offsetHeight || 0;
-    const y = target.getBoundingClientRect().top + window.pageYOffset - navOffset - announceOffset;
+    // Small gap so headings don't sit flush against the fixed header.
+    const gap = 12;
+    const y = target.getBoundingClientRect().top + window.pageYOffset - navOffset - announceOffset - gap;
     window.scrollTo({ top: Math.max(y, 0), behavior: 'instant' });
   }
   place();
@@ -261,7 +263,9 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     e.preventDefault();
     const navOffset = document.getElementById('navbar')?.offsetHeight || 72;
     const announceOffset = document.querySelector('.announcement-bar')?.offsetHeight || 0;
-    const y = target.getBoundingClientRect().top + window.pageYOffset - navOffset - announceOffset;
+    // Small gap so headings don't sit flush against the fixed header.
+    const gap = 12;
+    const y = target.getBoundingClientRect().top + window.pageYOffset - navOffset - announceOffset - gap;
     window.scrollTo({ top: y, behavior: 'smooth' });
     closeMobileMenu();
   });

@@ -2063,3 +2063,86 @@ body.mobile-cta-active {
 @media (min-width: 769px) and (max-width: 1023px) {
   .problem-solved-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ===== Signup block (#contact) =====
+   Ads and every "Book Free Lesson" button land here. Heading, price and the
+   short form are kept tight enough that the whole block fits on one phone
+   screen below the fixed announcement bar + nav. Paired fields sit side by
+   side only while the form is wide enough (measured in rem, so larger text
+   falls back to one column). */
+html {
+  scroll-padding-top: calc(var(--announce-height) + var(--nav-height) + 0.75rem);
+}
+
+.signup-block {
+  scroll-margin-top: calc(var(--announce-height) + var(--nav-height) + 0.75rem);
+  margin-bottom: 1.25rem;
+}
+
+.signup-title {
+  font-size: clamp(1.4rem, 4.5vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--color-text);
+  margin: 0 auto 0.5rem;
+  max-width: 34rem;
+}
+
+.signup-price {
+  font-size: 0.95rem;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--color-text);
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.85rem;
+  margin: 0 auto 0.85rem;
+  max-width: 34rem;
+}
+
+.signup-block .booking-form {
+  container-type: inline-size;
+  padding: clamp(1rem, 3.5vw, 2rem);
+  margin-bottom: 0;
+}
+
+.signup-block .form-field { margin-bottom: 0.75rem; }
+.signup-block .form-field label { margin-bottom: 0.3rem; }
+
+.signup-block .form-row { grid-template-columns: 1fr; gap: 0; }
+
+.signup-block .contact-choice { margin-bottom: 0.9rem; }
+.signup-block .contact-choice .field-label { margin-bottom: 0.15rem; }
+.signup-block .contact-choice .field-hint { margin: 0 0 0.6rem; }
+
+.signup-block .contact-or { margin: 0 0 0.6rem; }
+
+.signup-block .form-note-center { margin-top: 0.6rem; font-size: 0.8rem; line-height: 1.4; }
+
+@container (min-width: 18rem) {
+  .signup-block .form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .signup-block .contact-pair {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: end;
+    gap: 0.6rem;
+  }
+
+  /* Vertical "or" between the two inputs, centred on the input boxes. */
+  .signup-block .contact-pair .contact-or {
+    min-height: var(--tap-min);
+    margin: 0 0 0.75rem;
+    font-size: 0.75rem;
+  }
+  .signup-block .contact-pair .contact-or::before,
+  .signup-block .contact-pair .contact-or::after { display: none; }
+}
+
+.first-song-kit { margin-top: 2.5rem; }
+.signup-title .nobr { white-space: nowrap; }
